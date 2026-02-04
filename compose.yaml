@@ -1,0 +1,97 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: VPotoke-postgres
+    environment:
+      POSTGRES_DB: myapp_db
+      POSTGRES_USER: myapp_user
+      POSTGRES_PASSWORD: myapp_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U myapp_user -d myapp_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  minio:
+    image: minio/minio:latest
+    container_name: VPotoke-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: password
+    ports:
+      - "9000:9000"  # S3 API
+      - "9001:9001"  # Web Console
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - app-network
+
+  backend:
+    build: ./backend
+    container_name: VPotoke-backend
+    ports:
+      - "8080:8080"
+    environment:
+      # Database
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/myapp_db
+      - SPRING_DATASOURCE_USERNAME=myapp_user
+      - SPRING_DATASOURCE_PASSWORD=myapp_password
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+
+      # MinIO
+      - MINIO_ENDPOINT=http://minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=password
+      - MINIO_BUCKET_NAME=import-files
+
+#      # Infinispan
+#      - INFINISPAN_EMBEDDED=true
+    networks:
+      - app-network
+
+  frontend:
+    build: ./frontend
+    container_name: VPotoke-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/src:/app/src
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+#  pgadmin:
+#    image: dpage/pgadmin4:latest
+#    container_name: pgadminIS
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: "ajsoi@gmail.com"
+#      PGADMIN_DEFAULT_PASSWORD: "1111"
+#      PGADMIN_CONFIG_SERVER_MODE: "False"
+#    ports:
+#      - "5050:80"
+#    volumes:
+#      - pgadmin_data:/var/lib/pgadmin
+#      - ./pgadmin_config:/var/lib/pgadmin/pgadmin4
+#    networks:
+#      - app-network
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+  minio_data:
+networks:
+  app-network:
+    driver: bridge

@@ -3,12 +3,27 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import {BrowserRouter, Link, NavLink, Route, Routes} from 'react-router-dom';
+import RoomMain from "./room/RoomMain";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+    // {*вообще надо будет потом как-то id комнаты в путь конвертить, пока пофиг}
+    <React.StrictMode>
+        <BrowserRouter>
+            <nav className="navigation">
+                <NavLink
+                    to="/room"
+                    className={({isActive}) => isActive ? 'nav-link active' : 'nav-link'}
+                >
+                    Main
+                </NavLink>
+            <Routes>
+                <Route path="/room" element={<RoomMain/>}/>
+            </Routes>
+            </nav>
+        </BrowserRouter>
+    </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function
