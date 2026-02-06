@@ -20,7 +20,7 @@ bin/
 
 ### IntelliJ IDEA ###
 .idea
-backend/src/main/resources/application.properties
+backend/src/main/resources/
 *.iws
 *.iml
 *.ipr
