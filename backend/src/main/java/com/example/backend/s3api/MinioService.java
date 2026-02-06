@@ -11,13 +11,15 @@ import java.io.InputStream;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class MinioService {
 
     private final MinioClient minioClient;
 
-    @Value("${minio.bucket}")
+    @Value("${minio.bucket-name}")
     private String bucket;
+    public MinioService(MinioClient minioClient) {
+        this.minioClient = minioClient;
+    }
 
     //Для дяди Богдана
 //    public String saveImportFile(MultipartFile file) throws Exception {

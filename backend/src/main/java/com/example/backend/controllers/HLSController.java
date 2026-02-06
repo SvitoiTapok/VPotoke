@@ -1,6 +1,6 @@
 package com.example.backend.controllers;
 
-import com.example.backend.s3api.MinioService;
+import com.example.backend.s3api.YandexService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/hls")
 public class HLSController {
 
-    private final MinioService s3;
+    private final YandexService s3;
 
-    public HLSController(MinioService minioService) {
-        this.s3 = minioService;
+    public HLSController(YandexService yandexService) {
+        this.s3 = yandexService;
     }
 
     @GetMapping("/{filename:.+}")

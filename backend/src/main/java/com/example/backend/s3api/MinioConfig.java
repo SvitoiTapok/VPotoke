@@ -1,10 +1,13 @@
 package com.example.backend.s3api;
 
 import io.minio.MinioClient;
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+@Slf4j
 @Configuration
 public class MinioConfig {
 
@@ -23,5 +26,9 @@ public class MinioConfig {
                 .endpoint(endpoint)
                 .credentials(accessKey, secretKey)
                 .build();
+    }
+    @PostConstruct
+    public void test() {
+        log.info("Minio config loaded");
     }
 }
