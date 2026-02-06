@@ -1,18 +1,19 @@
 package com.example.backend.controllers;
 
 import com.example.backend.s3api.YandexService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/hls")
+@CrossOrigin(origins = "*")
+@RequestMapping("/api/video/stream")
 public class HLSController {
 
+    private static final Logger log = LoggerFactory.getLogger(HLSController.class);
     private final YandexService s3;
 
     public HLSController(YandexService yandexService) {
@@ -22,8 +23,8 @@ public class HLSController {
     @GetMapping("/{filename:.+}")
     public ResponseEntity<byte[]> getHlsFile(@PathVariable String filename) {
 
-        byte[] data = s3.getFile("hls/" + filename);
-
+        byte[] data = s3.getFile("hls_test/" + filename);
+        log.info("HLS File: {}", filename);
         MediaType type = filename.endsWith(".m3u8")
                 ? MediaType.valueOf("application/vnd.apple.mpegurl")
                 : MediaType.valueOf("video/MP2T");

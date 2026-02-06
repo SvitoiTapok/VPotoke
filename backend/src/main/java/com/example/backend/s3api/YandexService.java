@@ -55,7 +55,7 @@ public class YandexService {
                     "text/plain"
             );
 
-           log.info("✅ Файл загружен на Yandex Object Storage!");
+           log.info(" Файл загружен на Yandex Object Storage!");
         } catch (Exception e) {
             e.printStackTrace();
         }
