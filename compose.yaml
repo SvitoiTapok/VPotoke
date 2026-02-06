@@ -39,6 +39,8 @@ services:
       - app-network
 
   backend:
+    env_file:
+      - backend/.env
     build: ./backend
     container_name: VPotoke-backend
     ports:
