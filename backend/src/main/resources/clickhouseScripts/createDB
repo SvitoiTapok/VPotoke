@@ -1,0 +1,50 @@
+-- create_database.sql
+CREATE DATABASE IF NOT EXISTS vpotoke_clickhouse;
+
+USE vpotoke_clickhouse;
+
+CREATE TABLE IF NOT EXISTS messages
+(
+    id UInt64,
+    room_id UInt64,
+    text String,
+    creation_date DateTime64(3),
+    author_id UInt64
+)
+ENGINE = MergeTree
+ORDER BY (room_id, creation_date)
+TTL creation_date + INTERVAL 24 HOUR
+SETTINGS index_granularity = 8192;
+
+CREATE TABLE IF NOT EXISTS tags
+(
+    id UInt64,
+    name String,
+    creation_date DateTime64(3),
+    author_id UInt64
+)
+ENGINE = ReplacingMergeTree
+ORDER BY id
+SETTINGS index_granularity = 8192;
+
+CREATE TABLE IF NOT EXISTS playback_events
+(
+    id UInt64,
+    room_id UInt64,
+    event_type LowCardinality(String),
+    creation_date DateTime64(3),
+    author_id UInt64,
+    timing UInt64,
+    hls_segment UInt32,
+    offset UInt32
+)
+ENGINE = MergeTree
+ORDER BY (room_id, creation_date)
+TTL creation_date + INTERVAL 24 HOUR
+SETTINGS index_granularity = 8192;
+
+ALTER TABLE tags ADD INDEX tag_name_idx name
+TYPE ngrambf_v1(3, 256, 2, 0)
+GRANULARITY 1;
+
+это скрипт для создания clickhouse

@@ -1,0 +1,82 @@
+-- Сначала выберите базу данных
+USE vpotoke_clickhouse;
+
+-- 1. Заполняем таблицу tags (500 тегов)
+INSERT INTO tags (id, name, creation_date, author_id)
+SELECT
+    number as id,
+    concat(
+        ['Awesome', 'Funny', 'Scary', 'Romantic', 'Action', 'Drama', 'Comedy', 'SciFi', 'Documentary', 'Classic'][rand(1) % 10 + 1],
+        ' ',
+        ['Movie', 'Film', 'Video', 'Clip', 'Series', 'Episode', 'Scene', 'Trailer', 'Show', 'Stream'][rand(2) % 10 + 1],
+        ' ',
+        toString(rand(3) % 1000)
+    ) as name,
+    now() - (rand(4) % 2592000) as creation_date,
+    (rand(5) % 100) + 1 as author_id
+FROM numbers(1, 30000000);
+
+
+
+INSERT INTO messages (id, room_id, text, creation_date, author_id)
+SELECT
+    number AS id,
+    (rand(6) % 50) + 1 AS room_id,
+    [
+        'Отличный фильм!',
+        'Кто-нибудь видел продолжение?',
+        'Эта сцена просто потрясающая',
+        'Я уже смотрел это раньше',
+        'Что сейчас происходит?',
+        'Кто этот актер?',
+        'Советую посмотреть до конца',
+        'Где можно скачать?',
+        'Музыка просто шикарная',
+        'Не понимаю сюжета...',
+        'Это лучший момент!',
+        'Перематывайте скучную часть',
+        'Сколько времени осталось?',
+        'Есть субтитры?',
+        'Смотрю в первый раз',
+        'Уже третий раз пересматриваю',
+        'Кто режиссер?',
+        'Фильм какого года?',
+        'Где снимали?',
+        'Какой конец! Не ожидал!',
+        'Хочу такие же спецэффекты',
+        'Это отсылка к предыдущей части',
+        'Диалоги очень живые',
+        'Сюжет непредсказуемый',
+        'Рекомендую друзьям',
+        'Актеры играют великолепно',
+        'Операторская работа на высоте',
+        'Слишком затянуто',
+        'Могли бы сократить',
+        'Идеально для вечера'
+    ][(rand(7) % 30) + 1] AS text,
+    now() - (rand(8) % 7200) AS creation_date,
+    (rand(9) % 100) + 1 AS author_id
+FROM numbers(1, 4000000);
+
+
+
+-- 3. Заполняем таблицу playback_events (1000 событий воспроизведения)
+INSERT INTO playback_events (id, room_id, event_type, creation_date, author_id, timing, hls_segment, offset)
+SELECT
+    number as id,
+    (rand(10) % 50) + 1 as room_id,
+    ['play', 'pause', 'seek', 'buffer', 'ended'][rand(11) % 5 + 1] as event_type,
+    now() - (rand(12) % 7200) as creation_date,
+    (rand(13) % 100) + 1 as author_id,
+    rand(14) % 7200 as timing,
+    rand(15) % 1000 as hls_segment,
+    rand(16) % 10000 as offset
+FROM numbers(1, 1000000);
+
+
+
+SELECT 'tags' as table_name, count() as count FROM tags
+UNION ALL
+SELECT 'messages' as table_name, count() as count FROM messages
+UNION ALL
+SELECT 'playback_events' as table_name, count() as count FROM playback_events;

@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 import './Room.css';
 import HlsPlayer from "./HLSPlayer";
+import TextChat from "./TextChat";
 
 const RoomMain = () => {
     const [participants] = useState([
@@ -17,9 +18,7 @@ const RoomMain = () => {
                     <HlsPlayer/>
                 </div>
                 <div className="chat-area">
-                    <h3>Чаdgrffт</h3>
-                    <div className="messages"></div>
-                    <input type="text" placeholder="Введите сообщение..."/>
+                    <TextChat/>
                 </div>
             </main>
             <aside className="participants">
