@@ -18,6 +18,24 @@ services:
     networks:
       - app-network
 
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.1
+    container_name: clickhouse
+    hostname: clickhouse
+    ports:
+      - "8123:8123"   # HTTP интерфейс
+      - "9002:9002"   # Native TCP (JDBC)
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    environment:
+      CLICKHOUSE_DB: test_db
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: ""
+
   minio:
     image: minio/minio:latest
     container_name: VPotoke-minio
@@ -94,6 +112,7 @@ volumes:
   postgres_data:
   pgadmin_data:
   minio_data:
+  clickhouse_data:
 networks:
   app-network:
     driver: bridge

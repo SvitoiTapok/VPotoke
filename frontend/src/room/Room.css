@@ -23,6 +23,8 @@
     flex-direction: column;
 }
 .video-area {
+    width: 100%;
+    height: 70%;
     flex: 2;
     margin: 16px;
     background: #112a44;
@@ -53,4 +55,9 @@
     padding: 8px;
     border: none;
     outline: none;
+}
+video {
+    width: 100%;
+    height: 100%;
+    background: #000;
 }

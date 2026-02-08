@@ -6,7 +6,7 @@ const HlsPlayer = () => {
 
     useEffect(() => {
         const video = videoRef.current;
-        const fileName = "2026-02-06 20-21-20.remuxed.m3u8"; // имя файла HLS плейлиста
+        const fileName = "output.m3u8"; // имя файла HLS плейлиста
         const PATH = `http://localhost:8080/api/video/stream/${fileName}`;
 
         if (Hls.isSupported()) {
@@ -29,7 +29,7 @@ const HlsPlayer = () => {
             ref={videoRef}
             controls
             autoPlay
-            style={{ width: "100%", height: "100%", background: "#000" }}
+
         />
     );
 }

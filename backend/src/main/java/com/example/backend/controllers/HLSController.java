@@ -23,7 +23,7 @@ public class HLSController {
     @GetMapping("/{filename:.+}")
     public ResponseEntity<byte[]> getHlsFile(@PathVariable String filename) {
 
-        byte[] data = s3.getFile("hls_test/" + filename);
+        byte[] data = s3.getFile("hls_test2/" + filename);
         log.info("HLS File: {}", filename);
         MediaType type = filename.endsWith(".m3u8")
                 ? MediaType.valueOf("application/vnd.apple.mpegurl")
