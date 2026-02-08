@@ -1,6 +1,6 @@
 import {useEffect, useRef, useState} from "react";
 import SockJS from "sockjs-client";
-import { Client } from "@stomp/stompjs";
+import {Client} from "@stomp/stompjs";
 
 let stompClient = null;
 
@@ -8,6 +8,7 @@ const TextChat = () => {
     const [messages, setMessages] = useState([]);
     const [text, setText] = useState("");
     const clientRef = useRef(null);
+    const bottomRef = useRef(null);
 
 
     useEffect(() => {
@@ -25,14 +26,18 @@ const TextChat = () => {
             client.deactivate();
             clientRef.current = null;
         };
+
     }, []);
+    useEffect(() => {
+        bottomRef.current?.scrollIntoView({behavior: "smooth"});
+    }, [messages]);
 
     const send = () => {
         if (!clientRef.current || !clientRef.current.connected) return;
 
         clientRef.current.publish({
             destination: "/app/chat.send",
-            headers: { "content-type": "application/json" },
+            headers: {"content-type": "application/json"},
             body: JSON.stringify({
                 roomId: 1,
                 userId: 1,
@@ -43,16 +48,23 @@ const TextChat = () => {
     };
 
     return (
-        <div>
+        <div className="chat-area">
             <h2>Chat</h2>
-            <div style={{height: 300, overflow: "auto", border: "1px solid black"}}>
+            <div className="messages">
                 {messages.map((m, i) => (
                     <div key={i}><b>{m.author}({m.created_at.time})</b>: {m.text}</div>
                 ))}
+                <div ref={bottomRef}></div>
             </div>
 
-            <input value={text} onChange={e => setText(e.target.value)} onKeyPress={event => {if(event.key === 'Enter'){send()}}}/>
-            <button onClick={send}>Send</button>
+            <div className="sender">
+                <input value={text} onChange={e => setText(e.target.value)} onKeyPress={event => {
+                    if (event.key === 'Enter') {
+                        send()
+                    }
+                }} placeholder="Write Message..."/>
+                <button onClick={send}>Send</button>
+            </div>
         </div>
     );
 }

@@ -14,9 +14,7 @@ const RoomMain = () => {
 
 
             <main className="main-area">
-                <div className="video-area">
-                    <HlsPlayer/>
-                </div>
+                <HlsPlayer/>
                 <div className="chat-area">
                     <TextChat/>
                 </div>

@@ -6,7 +6,7 @@
     font-family: Arial, sans-serif;
 }
 .participants {
-    width: 220px;
+    max-width: 100%;
     background: #081421;
     padding: 16px;
     border-right: 2px solid #ff8c00;
@@ -21,10 +21,12 @@
     flex: 1;
     display: flex;
     flex-direction: column;
+    min-height: 0;
 }
 .video-area {
-    width: 100%;
-    height: 70%;
+    max-width: 100%;
+    max-height: 70%;
+    min-height: 0;
     flex: 2;
     margin: 16px;
     background: #112a44;
@@ -36,6 +38,8 @@
 .chat-area {
     flex: 1;
     margin: 16px;
+
+    height: 300px;
     background: #0f2238;
     border-top: 2px solid #ff8c00;
     display: flex;
@@ -46,18 +50,57 @@
     margin: 8px;
 }
 .messages {
+    height: 100%;
     flex: 1;
     margin: 8px;
     background: #081421;
+    overflow-y: auto;
 }
-.chat-area input {
+.sender input {
+    max-width: 60%;
     margin: 8px;
     padding: 8px;
     border: none;
     outline: none;
 }
-video {
+.sender button {
+    max-width: 20%;
+    background: #ff8c00;
+    margin: 8px;
+    padding: 8px;
+    border: none;
+    outline: none;
+}
+/*video*/
+.video {
+    position: relative;
     width: 100%;
     height: 100%;
-    background: #000;
+    max-height: 800px;
+    max-width: 1400px;
 }
+
+.native-timeline-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 38px;
+    height: 12px;
+    pointer-events: none;
+}
+
+/* сами метки */
+.marker {
+    position: absolute;
+    top: 14px;
+    width: 4px;
+    height: 18px;
+    margin-left: 15px;
+    background: #ff8c00;
+    transform: translateX(-50%);
+    pointer-events: auto; /* но маркеры кликабельны */
+    cursor: pointer;
+}
+
+.marker.goal { background: lime; }
+.marker.warning { background: red; }
