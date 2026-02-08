@@ -5,10 +5,10 @@ USE vpotoke_clickhouse;
 
 CREATE TABLE IF NOT EXISTS messages
 (
-    id UInt64,
+    id UUID,
     room_id UInt64,
     text String,
-    creation_date DateTime64(3),
+    creation_date DateTime,
     author_id UInt64
 )
 ENGINE = MergeTree

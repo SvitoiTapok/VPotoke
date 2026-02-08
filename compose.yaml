@@ -24,7 +24,7 @@ services:
     hostname: clickhouse
     ports:
       - "8123:8123"   # HTTP интерфейс
-      - "9002:9002"   # Native TCP (JDBC)
+      - "9000:9000"   # Native TCP (JDBC)
     volumes:
       - clickhouse_data:/var/lib/clickhouse
     ulimits:
@@ -32,9 +32,11 @@ services:
         soft: 262144
         hard: 262144
     environment:
-      CLICKHOUSE_DB: test_db
-      CLICKHOUSE_USER: default
-      CLICKHOUSE_PASSWORD: ""
+      CLICKHOUSE_DB: vpotoke_clickhouse
+      CLICKHOUSE_USER: "user"
+      CLICKHOUSE_PASSWORD: "password"
+    networks:
+      - app-network
 
   minio:
     image: minio/minio:latest
@@ -76,8 +78,6 @@ services:
       - MINIO_SECRET_KEY=password
       - MINIO_BUCKET_NAME=import-files
 
-#      # Infinispan
-#      - INFINISPAN_EMBEDDED=true
     networks:
       - app-network
 

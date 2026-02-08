@@ -1,19 +1,17 @@
-package com.example.backend.entities;
+package com.example.backend.DTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Getter
 @Setter
 @AllArgsConstructor
-public class ChatMessage {
-    private UUID id;
+public class ChatMessageOutputDTO {
     private long roomId;
     private String text;
-    private LocalDateTime creationDate;
-    private long userId;
+    private String author;
+    private LocalDateTime created_at;
 }

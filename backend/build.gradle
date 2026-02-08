@@ -20,22 +20,16 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-aop'
 
     implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.1.0'
     implementation 'io.github.resilience4j:resilience4j-reactor:2.1.0'
     runtimeOnly 'org.postgresql:postgresql'
-
-    implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
     implementation 'org.springframework.boot:spring-boot-starter-json'
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
-
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
@@ -43,6 +37,12 @@ dependencies {
     implementation 'io.minio:minio:8.5.9'
     //yandex
     implementation 'software.amazon.awssdk:s3:2.25.30'
+    //clickhouse
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    implementation 'com.clickhouse:clickhouse-jdbc:0.6.0'
+    implementation 'com.github.f4b6a3:uuid-creator:5.3.2'
+    implementation 'org.apache.httpcomponents.client5:httpclient5:5.2'
+    implementation 'org.apache.httpcomponents.core5:httpcore5:5.2'
 
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
 }

@@ -1,30 +1,44 @@
-import { useEffect, useState } from "react";
+import {useEffect, useRef, useState} from "react";
 import SockJS from "sockjs-client";
-import Stomp from "stompjs";
+import { Client } from "@stomp/stompjs";
 
 let stompClient = null;
 
 const TextChat = () => {
     const [messages, setMessages] = useState([]);
     const [text, setText] = useState("");
+    const clientRef = useRef(null);
+
 
     useEffect(() => {
-        const socket = new SockJS("http://localhost:8080/ws");
-        stompClient = Stomp.over(socket);
-
-        stompClient.connect({}, () => {
-            stompClient.subscribe("/topic/room", msg => {
-                setMessages(prev => [...prev, JSON.parse(msg.body)]);
-            });
+        const client = new Client({
+            webSocketFactory: () => new SockJS("http://localhost:8080/ws"),
+            onConnect: () => {
+                client.subscribe("/topic/room", msg => {
+                    setMessages(prev => [...prev, JSON.parse(msg.body)]);
+                });
+            }
         });
+        client.activate()
+        clientRef.current = client;
+        return () => {
+            client.deactivate();
+            clientRef.current = null;
+        };
     }, []);
 
     const send = () => {
-        stompClient.send("/app/chat.send", { "content-type": "application/json" }, JSON.stringify({
-            roomId: "1",
-            user: "User1",
-            text: text
-        }));
+        if (!clientRef.current || !clientRef.current.connected) return;
+
+        clientRef.current.publish({
+            destination: "/app/chat.send",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+                roomId: 1,
+                userId: 1,
+                text
+            })
+        });
         setText("");
     };
 
@@ -33,7 +47,7 @@ const TextChat = () => {
             <h2>Chat</h2>
             <div style={{height: 300, overflow: "auto", border: "1px solid black"}}>
                 {messages.map((m, i) => (
-                    <div key={i}><b>{m.user}</b>: {m.text}</div>
+                    <div key={i}><b>{m.author}({m.created_at.time})</b>: {m.text}</div>
                 ))}
             </div>
 
