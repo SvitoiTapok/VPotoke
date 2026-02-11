@@ -1,9 +1,9 @@
 package com.example.backend.repositories;
 
-import com.example.backend.entities.Participant;
+import com.example.backend.entities.Room;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;
 
-public interface ParticipantRepository extends JpaRepository<Participant, UUID> {
+public interface RoomRepository extends JpaRepository<Room, UUID> {
 }

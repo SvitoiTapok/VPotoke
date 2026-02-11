@@ -12,8 +12,8 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ChatMessage {
     private UUID id;
-    private long roomId;
+    private UUID roomId;
     private String text;
     private LocalDateTime creationDate;
-    private long userId;
+    private UUID userId;
 }

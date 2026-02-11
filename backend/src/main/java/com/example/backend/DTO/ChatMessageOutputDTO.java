@@ -5,12 +5,13 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
 @AllArgsConstructor
 public class ChatMessageOutputDTO {
-    private long roomId;
+    private UUID roomId;
     private String text;
     private String author;
     private LocalDateTime created_at;

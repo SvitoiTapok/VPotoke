@@ -80,25 +80,26 @@
     max-width: 1400px;
 }
 
-.native-timeline-overlay {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 38px;
-    height: 12px;
-    pointer-events: none;
+.video-js .vjs-progress-control {
+    position: relative;
 }
 
-/* сами метки */
-.marker {
+/* сама дорожка */
+.video-js .vjs-progress-holder {
+    position: relative;
+}
+
+/* маркер */
+.vjs-marker {
     position: absolute;
-    top: 14px;
-    width: 4px;
-    height: 18px;
-    margin-left: 15px;
-    background: #ff8c00;
+    top: 0;
+    height: 100%;
+    width: 3px;
+    margin-left: 10px;
+    background: red;
+    z-index: 10;
     transform: translateX(-50%);
-    pointer-events: auto; /* но маркеры кликабельны */
+    pointer-events: auto;
     cursor: pointer;
 }
 

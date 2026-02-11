@@ -18,7 +18,7 @@ public class MessageRepository {
         this.jdbc = jdbc;
     }
 
-    public ChatMessage save(long authorId, String text, long room_id) {
+    public ChatMessage save(UUID authorId, String text, UUID room_id) {
         UUID id = UuidCreator.getTimeOrderedEpoch();
         LocalDateTime now = LocalDateTime.now();
         jdbc.update(
@@ -36,10 +36,10 @@ public class MessageRepository {
             LIMIT ?
         """, (rs, i) -> new ChatMessage(
                 rs.getObject("id", UUID.class),
-                rs.getLong("room_id"),
+                rs.getObject("room_id", UUID.class),
                 rs.getString("text"),
                 rs.getTimestamp("created_at").toLocalDateTime(),
-                rs.getLong("author_id")
+                rs.getObject("author_id", UUID.class)
         ), limit);
     }
 }

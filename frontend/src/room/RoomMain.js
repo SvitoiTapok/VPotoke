@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import {useState} from 'react';
 
 import './Room.css';
-import HlsPlayer from "./HLSPlayer";
 import TextChat from "./TextChat";
+import HlsPlayerNew from "./Player/HLSPlayerNew";
 
 const RoomMain = () => {
     const [participants] = useState([
@@ -14,7 +14,9 @@ const RoomMain = () => {
 
 
             <main className="main-area">
-                <HlsPlayer/>
+                <div className="video-area">
+                    <HlsPlayerNew/>
+                </div>
                 <div className="chat-area">
                     <TextChat/>
                 </div>
@@ -30,7 +32,8 @@ const RoomMain = () => {
 
 
         </div>
-    );
+    )
+        ;
 }
 
 

@@ -2,8 +2,6 @@ import {useEffect, useRef, useState} from "react";
 import SockJS from "sockjs-client";
 import {Client} from "@stomp/stompjs";
 
-let stompClient = null;
-
 const TextChat = () => {
     const [messages, setMessages] = useState([]);
     const [text, setText] = useState("");

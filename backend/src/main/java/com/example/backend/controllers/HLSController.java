@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @CrossOrigin(origins = "*")
-@RequestMapping("/api/video/stream")
+@RequestMapping("/player/api")
 public class HLSController {
 
     private static final Logger log = LoggerFactory.getLogger(HLSController.class);
@@ -20,7 +20,7 @@ public class HLSController {
         this.s3 = yandexService;
     }
 
-    @GetMapping("/{filename:.+}")
+    @GetMapping("/stream/{filename:.+}")
     public ResponseEntity<byte[]> getHlsFile(@PathVariable String filename) {
 
         byte[] data = s3.getFile("hls_test2/" + filename);
