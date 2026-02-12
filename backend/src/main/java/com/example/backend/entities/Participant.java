@@ -11,6 +11,12 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @Entity
+@Table(
+        name = "participant",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"room_id", "sessionId"})
+        }
+)
 public class Participant {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -22,6 +28,8 @@ public class Participant {
     private Boolean message_rights;
     @Column
     private Boolean player_rights;
+    @Column(nullable = false)
+    private String sessionId;
 
     @ManyToOne
     @JoinColumn(name="room_id", nullable = false)

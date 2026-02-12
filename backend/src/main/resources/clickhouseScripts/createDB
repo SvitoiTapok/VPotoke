@@ -6,10 +6,10 @@ USE vpotoke_clickhouse;
 CREATE TABLE IF NOT EXISTS messages
 (
     id UUID,
-    room_id UInt64,
+    room_id UUID,
     text String,
     creation_date DateTime,
-    author_id UInt64
+    author_id UUID
 )
 ENGINE = MergeTree
 ORDER BY (room_id, creation_date)
@@ -30,10 +30,10 @@ SETTINGS index_granularity = 8192;
 CREATE TABLE IF NOT EXISTS playback_events
 (
     id UInt64,
-    room_id UInt64,
+    room_id UUID,
     event_type LowCardinality(String),
     creation_date DateTime64(3),
-    author_id UInt64,
+    author_id UUID,
     timing UInt64,
     hls_segment UInt32,
     offset UInt32

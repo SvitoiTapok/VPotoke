@@ -22,9 +22,9 @@ public class RoomController {
     }
 
     @GetMapping("/newParticipant")
-    public ResponseEntity<UUID> newParticipant(@RequestParam UUID roomId) {
+    public ResponseEntity<UUID> newParticipant(@RequestParam UUID roomId, @RequestParam String sessionId) {
         try {
-            UUID id = roomSerivce.newParticipant(roomId);
+            UUID id = roomSerivce.newParticipant(roomId, sessionId);
             return ResponseEntity.ok().body(id);
         }catch (NoSuchElementException e){
             return ResponseEntity.notFound().build();
@@ -48,9 +48,9 @@ public class RoomController {
 //                .body(data);
     }
     @GetMapping("/newParticipantWithName")
-    public ResponseEntity<UUID> newParticipantWithName(@RequestParam UUID roomId, @RequestParam String filename) {
+    public ResponseEntity<UUID> newParticipantWithName(@RequestParam UUID roomId, @RequestParam String name, @RequestParam String sessionId) {
         try {
-            UUID id = roomSerivce.newParticipantWithName(roomId, filename);
+            UUID id = roomSerivce.newParticipantWithName(roomId, name, sessionId);
             return ResponseEntity.ok().body(id);
         }catch (NoSuchElementException e){
             return ResponseEntity.notFound().build();

@@ -1,24 +1,33 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 
 import './Room.css';
 import TextChat from "./TextChat";
 import HlsPlayerNew from "./Player/HLSPlayerNew";
+import roomService from "./services/RoomService";
 
-const RoomMain = () => {
+const RoomMain = (props) => {
     const [participants] = useState([
         'Алексей', 'Мария', 'Иван', 'Ольга'
     ]);
+    const [prid, setPrid] = useState(null)
+    const [mon, setMon] = useState(false)
+    useEffect(() => {
+        if(prid||mon) return
+        setMon(true);
+        roomService.getOrCreateParticipant(props.roomId).then((data) => setPrid(data))
 
+        return () => {setMon(false)};
+    }, [prid, mon])
     return (
         <div className="room-container">
 
 
             <main className="main-area">
                 <div className="video-area">
-                    <HlsPlayerNew/>
+                    <HlsPlayerNew prid={prid}/>
                 </div>
                 <div className="chat-area">
-                    <TextChat/>
+                    <TextChat prid={prid}/>
                 </div>
             </main>
             <aside className="participants">

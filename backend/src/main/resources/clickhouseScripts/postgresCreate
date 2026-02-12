@@ -1,0 +1,26 @@
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+INSERT INTO app_user (id, login, password, registration_date)
+VALUES
+(gen_random_uuid(), 'alice', 'pass1', now()),
+(gen_random_uuid(), 'bob',   'pass2', now()),
+(gen_random_uuid(), 'carol', 'pass3', now());
+
+INSERT INTO room (id, creation_date, name, description, link, user_id)
+VALUES
+(gen_random_uuid(), now(), 'General Chat', 'Общий чат', 'link-1',
+ (SELECT id FROM app_user WHERE login = 'alice')),
+
+(gen_random_uuid(), now(), 'Games', 'Игровая комната', 'link-2',
+ (SELECT id FROM app_user WHERE login = 'bob'));
+
+ INSERT INTO participant (id, nickname, message_rights, player_rights, room_id)
+ VALUES
+ (gen_random_uuid(), 'alice', true, true,
+  (SELECT r.id FROM room r WHERE r.name = 'General Chat')),
+
+ (gen_random_uuid(), 'bob', true, false,
+  (SELECT r.id FROM room r WHERE r.name = 'General Chat')),
+
+ (gen_random_uuid(), 'carol', false, true,
+  (SELECT r.id FROM room r WHERE r.name = 'Games'));

@@ -11,6 +11,7 @@ import com.example.backend.repositories.RoomRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -32,16 +33,25 @@ public class RoomSerivce {
         if (owner == null){throw new NoSuchElementException();}
         return new ChatMessageOutputDTO(ch.getRoomId(), ch.getText(), owner.getNickname(), ch.getCreationDate());
     }
-    public UUID newParticipant(UUID roomId){
+    public UUID newParticipant(UUID roomId, String sessionId){
+        Optional<Participant> existing = participantRepository.findByRoomIdAndSessionId(roomId, sessionId);
+        if (existing.isPresent()){
+            return existing.get().getId();
+        }
         Participant p = new Participant();
         Room r = roomRepository.findById(roomId).orElseThrow(NoSuchElementException::new);
         p.setRoom(r);
         p.setNickname("Participant " + UUID.randomUUID());
         p.setPlayer_rights(true);
         p.setMessage_rights(true);
+        p.setSessionId(sessionId);
         return participantRepository.save(p).getId();
     }
-    public UUID newParticipantWithName(UUID roomId, String name){
+    public UUID newParticipantWithName(UUID roomId, String name, String sessionId){
+        Optional<Participant> existing = participantRepository.findByRoomIdAndSessionId(roomId, sessionId);
+        if (existing.isPresent()){
+            return existing.get().getId();
+        }
         Participant p = new Participant();
         Room r = roomRepository.findById(roomId).orElseThrow(NoSuchElementException::new);
         p.setRoom(r);

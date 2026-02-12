@@ -19,7 +19,7 @@ root.render(
                     Main
                 </NavLink>
             <Routes>
-                <Route path="/room" element={<RoomMain/>}/>
+                <Route path="/room" element={<RoomMain roomId="ebd009f1-ad4b-4709-a8e0-d9482edc0628"/>}/>
             </Routes>
             </nav>
         </BrowserRouter>

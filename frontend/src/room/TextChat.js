@@ -2,7 +2,7 @@ import {useEffect, useRef, useState} from "react";
 import SockJS from "sockjs-client";
 import {Client} from "@stomp/stompjs";
 
-const TextChat = () => {
+const TextChat = (props) => {
     const [messages, setMessages] = useState([]);
     const [text, setText] = useState("");
     const clientRef = useRef(null);
@@ -37,8 +37,8 @@ const TextChat = () => {
             destination: "/app/chat.send",
             headers: {"content-type": "application/json"},
             body: JSON.stringify({
-                roomId: 1,
-                userId: 1,
+                roomId: "ebd009f1-ad4b-4709-a8e0-d9482edc0628",
+                userId: props.prid,
                 text
             })
         });
