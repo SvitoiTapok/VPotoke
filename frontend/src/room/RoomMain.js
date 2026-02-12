@@ -24,10 +24,10 @@ const RoomMain = (props) => {
 
             <main className="main-area">
                 <div className="video-area">
-                    <HlsPlayerNew prid={prid}/>
+                    <HlsPlayerNew prid={prid} roomId={props.roomId}/>
                 </div>
                 <div className="chat-area">
-                    <TextChat prid={prid}/>
+                    <TextChat prid={prid} roomId={props.roomId}/>
                 </div>
             </main>
             <aside className="participants">

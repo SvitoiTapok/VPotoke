@@ -27,9 +27,23 @@ ENGINE = ReplacingMergeTree
 ORDER BY id
 SETTINGS index_granularity = 8192;
 
+CREATE TABLE IF NOT EXISTS player_pos
+(
+    creation_date DateTime,
+    author_id UUID,
+    room_id UUID,
+    timing UInt64,
+)
+ENGINE = MergeTree
+ORDER BY (room_id, creation_date)
+TTL creation_date + INTERVAL 24 HOUR
+SETTINGS index_granularity = 8192;
+
+
+
 CREATE TABLE IF NOT EXISTS playback_events
 (
-    id UInt64,
+    id UUID,
     room_id UUID,
     event_type LowCardinality(String),
     creation_date DateTime64(3),

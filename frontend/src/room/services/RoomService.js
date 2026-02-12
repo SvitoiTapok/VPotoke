@@ -26,7 +26,34 @@ const roomService = {
             }
             throw error;
         }
-    }
+    },
+    sendPosition: async (author_id, room_id, timing) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/addNewPlayerPos`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({authorId: author_id, roomId: room_id, timing: timing})
+            });
+        } catch (error) {
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                throw new Error('Ошибка соединения с сервером.');
+            }
+            throw error;
+        }
+    },
+    getPositions: async (roomId, authorId) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/getPlayerPos?roomId=${roomId}&authorId=${authorId}`);
+            return response.json()
+        } catch (error) {
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                throw new Error('Ошибка соединения с сервером.');
+            }
+            throw error;
+        }
+    },
 
 };
 

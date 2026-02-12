@@ -1,10 +1,7 @@
 package com.example.backend.controllers;
 
-import com.example.backend.entities.Participant;
-import com.example.backend.entities.Room;
+import com.example.backend.DTO.PlayerPosInputDTO;
 import com.example.backend.services.RoomSerivce;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -57,5 +54,14 @@ public class RoomController {
         }catch (Exception e){
             return ResponseEntity.badRequest().build();
         }
+    }
+    @PostMapping("/addNewPlayerPos")
+    public ResponseEntity<?> addNewPlayerPos(@RequestBody PlayerPosInputDTO pl) {
+        roomSerivce.registerPlayerPos(pl.getAuthorId(), pl.getRoomId(), pl.getTiming());
+        return ResponseEntity.ok().build();
+    }
+    @GetMapping("/getPlayerPos")
+    public ResponseEntity<?> getPlayerPos(@RequestParam UUID roomId, @RequestParam UUID authorId) {
+        return ResponseEntity.ok(roomSerivce.getActualPlayerPos(roomId, authorId));
     }
 }

@@ -1,11 +1,12 @@
 import {useEffect, useRef, useState} from "react";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
+import roomService from "../services/RoomService";
 
-const HlsPlayerNew = () => {
+const HlsPlayerNew = (props) => {
     const videoRef = useRef(null);
     const playerRef = useRef(null);
-    const [markers, serMarkers] = useState([]);
+    const [markers, setMarkers] = useState([]);
 
     useEffect(() => {
         setTimeout(() => {
@@ -25,11 +26,11 @@ const HlsPlayerNew = () => {
             });
 
             playerRef.current = player;
-            serMarkers([
-                { id: 1, time: 0, type: "event" },
-                { id: 2, time: 47, type: "warning" },
-                { id: 3, time: 93, type: "goal" }
-            ]);
+            // setMarkers([
+            //     { id: 1, time: 0, type: "event" },
+            //     { id: 2, time: 47, type: "warning" },
+            //     { id: 3, time: 93, type: "goal" }
+            // ]);
 
         }, 100)
 
@@ -40,13 +41,30 @@ const HlsPlayerNew = () => {
             }
         };
     }, []);
+    useEffect(() => {
+        const t = setInterval(()=>{
+            let timing = Math.floor(playerRef.current.currentTime())
+            roomService.sendPosition(props.prid, props.roomId, timing)
+            roomService.getPositions(props.roomId, props.prid).then((data)=>{
+                setMarkers(data)
+                updateMarkers()
+            })
+
+        }, 5000)
+        return () => clearInterval(t)
+    }, [props, markers]);
 
     const updateMarkers = () => {
+        console.log(markers)
+        const progressEl = playerRef.current.controlBar.progressControl.el();
+
+        progressEl.querySelectorAll(".vjs-marker").forEach(el => el.remove());
+        playerRef.current.controlBar.progressControl.el()
         markers.forEach(m => {
             const el = document.createElement("div");
             el.className = "vjs-marker";
             console.log(playerRef.current.duration())
-            el.style.left = `${(m.time / playerRef.current.duration()) * 100}%`;
+            el.style.left = `${(m.timing / playerRef.current.duration()) * 100}%`;
             playerRef.current.controlBar.progressControl.el().appendChild(el);
         });
     }
@@ -56,7 +74,6 @@ const HlsPlayerNew = () => {
             <video
                 ref={videoRef}
                 className="video-js vjs-default-skin"
-                onPause={updateMarkers}
             />
         </div>
     );

@@ -16,6 +16,6 @@ public class ChatController {
     @MessageMapping("/chat.send")
     @SendTo("/topic/room")
     public ChatMessageOutputDTO send(ChatMessageInputDTO message) {
-        return roomSerivce.save(message);
+        return roomSerivce.saveMessage(message);
     }
 }
