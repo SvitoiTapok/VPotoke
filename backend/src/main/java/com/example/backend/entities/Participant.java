@@ -30,6 +30,8 @@ public class Participant {
     private Boolean message_rights;
     @Column
     private Boolean player_rights;
+    @Column
+    private Boolean admin;
     @Column(nullable = false)
     private String sessionId;
     @Column(columnDefinition = "VARCHAR(7)")
