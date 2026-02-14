@@ -50,7 +50,7 @@ const HlsPlayerNew = (props) => {
                 updateMarkers()
             })
 
-        }, 5000)
+        }, 1000)
         return () => clearInterval(t)
     }, [props, markers]);
 
@@ -63,8 +63,11 @@ const HlsPlayerNew = (props) => {
         markers.forEach(m => {
             const el = document.createElement("div");
             el.className = "vjs-marker";
-            console.log(playerRef.current.duration())
             el.style.left = `${(m.timing / playerRef.current.duration()) * 100}%`;
+            const label = document.createElement("span");
+            label.className = "vjs-marker-label";
+            label.textContent = m.name || "";
+            el.appendChild(label)
             playerRef.current.controlBar.progressControl.el().appendChild(el);
         });
     }
