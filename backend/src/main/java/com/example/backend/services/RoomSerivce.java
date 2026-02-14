@@ -11,9 +11,11 @@ import com.example.backend.repositories.MessageRepository;
 import com.example.backend.repositories.ParticipantRepository;
 import com.example.backend.repositories.PlayerPosRepository;
 import com.example.backend.repositories.RoomRepository;
+import com.example.backend.util.ColorUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -34,12 +36,13 @@ public class RoomSerivce {
 
 
     public ChatMessageOutputDTO saveMessage(ChatMessageInputDTO input){
+        if (!participantRepository.findById(input.getUserId()).get().getMessage_rights()) {
+            return null;
+        }
         ChatMessage ch = messageRepository.save(input.getUserId(), input.getText(), input.getRoomId());
         Participant owner = participantRepository.findById(ch.getUserId()).orElse(null);
-        System.out.println(owner);
-        System.out.println(input);
         if (owner == null){throw new NoSuchElementException();}
-        return new ChatMessageOutputDTO(ch.getRoomId(), ch.getText(), owner.getNickname(), ch.getCreationDate());
+        return new ChatMessageOutputDTO(ch.getRoomId(), ch.getText(), owner.getNickname(), ch.getCreationDate().format(DateTimeFormatter.ISO_TIME));
     }
 
     public UUID newParticipant(UUID roomId, String sessionId){
@@ -51,6 +54,7 @@ public class RoomSerivce {
         Room r = roomRepository.findById(roomId).orElseThrow(NoSuchElementException::new);
         p.setRoom(r);
         p.setNickname("Participant " + UUID.randomUUID());
+        p.setColor(ColorUtil.randomNiceColor());
         p.setPlayer_rights(true);
         p.setMessage_rights(true);
         p.setSessionId(sessionId);
@@ -66,6 +70,7 @@ public class RoomSerivce {
         Room r = roomRepository.findById(roomId).orElseThrow(NoSuchElementException::new);
         p.setRoom(r);
         p.setNickname(name);
+        p.setColor(ColorUtil.randomNiceColor());
         p.setPlayer_rights(true);
         p.setMessage_rights(true);
         return participantRepository.save(p).getId();
@@ -78,8 +83,9 @@ public class RoomSerivce {
         return playerPosRepository.getLastPos(roomId, authorId).stream().map((PlayerPos p) -> {
             PlayerPosOutputDTO ans = new PlayerPosOutputDTO();
             ans.setTiming(p.getTiming());
-            log.info(p.getAuthorId().toString());
-            ans.setName(Objects.requireNonNull(participantRepository.findById(p.getAuthorId()).orElse(null)).getNickname());
+            Participant author = Objects.requireNonNull(participantRepository.findById(p.getAuthorId()).orElse(null));
+            ans.setName(author.getNickname());
+            ans.setColor(author.getColor());
             return ans;
         }).toList();
     }

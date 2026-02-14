@@ -32,6 +32,8 @@ public class Participant {
     private Boolean player_rights;
     @Column(nullable = false)
     private String sessionId;
+    @Column(columnDefinition = "VARCHAR(7)")
+    private String color;
 
     @ManyToOne
     @JoinColumn(name="room_id", nullable = false)

@@ -10,14 +10,9 @@ const RoomMain = (props) => {
         'Алексей', 'Мария', 'Иван', 'Ольга'
     ]);
     const [prid, setPrid] = useState(null)
-    const [mon, setMon] = useState(false)
     useEffect(() => {
-        if(prid||mon) return
-        setMon(true);
         roomService.getOrCreateParticipant(props.roomId).then((data) => setPrid(data))
-
-        return () => {setMon(false)};
-    }, [prid, mon])
+    }, [prid])
     return (
         <div className="room-container">
 

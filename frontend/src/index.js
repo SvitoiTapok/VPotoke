@@ -5,10 +5,12 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import {BrowserRouter, Link, NavLink, Route, Routes} from 'react-router-dom';
 import RoomMain from "./room/RoomMain";
+import {WebSocketProvider} from "./room/services/WebSocketContext";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     // {*вообще надо будет потом как-то id комнаты в путь конвертить, пока пофиг}
+    <WebSocketProvider>
     <React.StrictMode>
         <BrowserRouter>
             <nav className="navigation">
@@ -24,6 +26,7 @@ root.render(
             </nav>
         </BrowserRouter>
     </React.StrictMode>
+    </WebSocketProvider>
 );
 
 // If you want to start measuring performance in your app, pass a function

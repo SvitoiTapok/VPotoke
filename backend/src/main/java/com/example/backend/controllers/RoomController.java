@@ -64,4 +64,8 @@ public class RoomController {
     public ResponseEntity<?> getPlayerPos(@RequestParam UUID roomId, @RequestParam UUID authorId) {
         return ResponseEntity.ok(roomSerivce.getActualPlayerPos(roomId, authorId));
     }
+//    @GetMapping("/getParticipants")
+//    public ResponseEntity<?> getPlayerPos(@RequestParam UUID roomId) {
+//        return ResponseEntity.ok(roomSerivce.getParticipants(roomId));
+//    }
 }

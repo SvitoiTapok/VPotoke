@@ -9,5 +9,6 @@ import java.util.UUID;
 @Setter
 public class PlayerPosOutputDTO {
     private String name;
+    private String color;
     private long timing;
 }
