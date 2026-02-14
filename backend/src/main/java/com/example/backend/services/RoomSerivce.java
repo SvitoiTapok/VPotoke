@@ -89,4 +89,14 @@ public class RoomSerivce {
             return ans;
         }).toList();
     }
+    public void deleteParticipant(UUID authorId){
+        Participant p = participantRepository.findById(authorId).orElseThrow(NoSuchElementException::new);
+        participantRepository.delete(p);
+        log.info("Deleted participant " + authorId);
+    }
+//    public void deleteParticipant(String sessionId){
+//        Participant p = participantRepository.findBySessionId(sessionId).orElseThrow(NoSuchElementException::new);
+//        participantRepository.delete(p);
+//        log.info("Deleted participant " + sessionId);
+//    }
 }

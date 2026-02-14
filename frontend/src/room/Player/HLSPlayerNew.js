@@ -2,8 +2,10 @@ import {useEffect, useRef, useState} from "react";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
 import roomService from "../services/RoomService";
+import {useWS} from "../services/WebSocketContext";
 
 const HlsPlayerNew = (props) => {
+    const {subscribe, send} = useWS()
     const videoRef = useRef(null);
     const playerRef = useRef(null);
     const [markers, setMarkers] = useState([]);
@@ -34,6 +36,7 @@ const HlsPlayerNew = (props) => {
 
         }, 100)
 
+
         return () => {
             if (playerRef.current) {
                 playerRef.current.dispose();
@@ -41,18 +44,37 @@ const HlsPlayerNew = (props) => {
             }
         };
     }, []);
+    // useEffect(() => {
+    //     const t = setInterval(()=>{
+    //         let timing = Math.floor(playerRef.current.currentTime())
+    //         roomService.sendPosition(props.prid, props.roomId, timing)
+    //         roomService.getPositions(props.roomId, props.prid).then((data)=>{
+    //             setMarkers(data)
+    //             updateMarkers()
+    //         })
+    //     }, 1000)
+    //     return () => clearInterval(t)
+    // }, [props, markers]);
+
     useEffect(() => {
-        const t = setInterval(()=>{
+        const sub = subscribe(`/topic/room/${props.roomId}/player`, (msg) => {
+            const chat = JSON.parse(msg.body);
+            console.log(chat)
+            setMarkers(chat);
+            updateMarkers()
+        });
+        let inter = setInterval(()=>{
             let timing = Math.floor(playerRef.current.currentTime())
-            roomService.sendPosition(props.prid, props.roomId, timing)
-            roomService.getPositions(props.roomId, props.prid).then((data)=>{
-                setMarkers(data)
-                updateMarkers()
+            console.log("nice")
+            send({
+                destination: `/app/player.send/${props.roomId}`,
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({ authorId: props.prid, roomId: props.roomId, timing: timing }),
             })
         }, 1000)
-        return () => clearInterval(t)
-    }, [props, markers]);
 
+        return () => {sub?.unsubscribe(); clearInterval(inter)};
+    }, [subscribe, props, markers]);
     const updateMarkers = () => {
         console.log(markers)
         const progressEl = playerRef.current.controlBar.progressControl.el();

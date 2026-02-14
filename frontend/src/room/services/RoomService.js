@@ -8,6 +8,7 @@ const roomService = {
             id = crypto.randomUUID();
             sessionStorage.setItem("session_id", id);
         }
+        console.log(id)
         return id;
     },
     getOrCreateParticipant: async (roomUUID) => {
@@ -64,10 +65,21 @@ const roomService = {
             }
             throw error;
         }
+    },
+    deleteParticipant: async (userId) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/deleteParticipant/${userId}`, {
+                method: 'DELETE'
+}
+            )
+            return response.json()
+        } catch (error) {
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                throw new Error('Ошибка соединения с сервером.');
+            }
+            throw error;
+        }
     }
-    // deleteParticipant: async (roomId) => {
-    //
-    // }
 
 };
 

@@ -8,4 +8,6 @@ import java.util.UUID;
 
 public interface ParticipantRepository extends JpaRepository<Participant, UUID> {
     Optional<Participant> findByRoomIdAndSessionId(UUID roomId, String session_Id);
+    Optional<Participant> findBySessionId(String sessionId);
+
 }

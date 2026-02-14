@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 
 import './Room.css';
 import TextChat from "./TextChat";
@@ -10,9 +10,36 @@ const RoomMain = (props) => {
         'Алексей', 'Мария', 'Иван', 'Ольга'
     ]);
     const [prid, setPrid] = useState(null)
+    const mon = useRef(false)
+
+    const pridRef = useRef(null);
+
     useEffect(() => {
-        roomService.getOrCreateParticipant(props.roomId).then((data) => setPrid(data))
-    }, [prid])
+        roomService.getOrCreateParticipant(props.roomId)
+            .then(id => {
+                setPrid(id);
+                pridRef.current = id;
+            });
+    }, [props.roomId]);
+
+    useEffect(() => {
+        const handler = () => {
+            if (mon.current) return;
+            mon.current = true;
+
+            const data = JSON.stringify(payload);
+            const blob = new Blob([data], { type: "application/json" });
+            navigator.sendBeacon(url, blob);
+        };
+
+        window.addEventListener("pagehide", handler);
+        window.addEventListener("beforeunload", handler);
+
+        return () => {
+            window.removeEventListener("pagehide", handler);
+            window.removeEventListener("beforeunload", handler);
+        };
+    }, []);
     return (
         <div className="room-container">
 

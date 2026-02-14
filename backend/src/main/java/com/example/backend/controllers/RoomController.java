@@ -2,18 +2,23 @@ package com.example.backend.controllers;
 
 import com.example.backend.DTO.PlayerPosInputDTO;
 import com.example.backend.services.RoomSerivce;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.event.EventListener;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @CrossOrigin(origins = "*")
 @RequestMapping("/room/api")
 public class RoomController {
 
     private final RoomSerivce roomSerivce;
+
     public RoomController(RoomSerivce roomSerivce) {
         this.roomSerivce = roomSerivce;
     }
@@ -23,9 +28,9 @@ public class RoomController {
         try {
             UUID id = roomSerivce.newParticipant(roomId, sessionId);
             return ResponseEntity.ok().body(id);
-        }catch (NoSuchElementException e){
+        } catch (NoSuchElementException e) {
             return ResponseEntity.notFound().build();
-        }catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
 
@@ -44,28 +49,44 @@ public class RoomController {
 //                .contentType(type)
 //                .body(data);
     }
+
     @GetMapping("/newParticipantWithName")
     public ResponseEntity<UUID> newParticipantWithName(@RequestParam UUID roomId, @RequestParam String name, @RequestParam String sessionId) {
         try {
             UUID id = roomSerivce.newParticipantWithName(roomId, name, sessionId);
             return ResponseEntity.ok().body(id);
-        }catch (NoSuchElementException e){
+        } catch (NoSuchElementException e) {
             return ResponseEntity.notFound().build();
-        }catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
     }
+
     @PostMapping("/addNewPlayerPos")
     public ResponseEntity<?> addNewPlayerPos(@RequestBody PlayerPosInputDTO pl) {
         roomSerivce.registerPlayerPos(pl.getAuthorId(), pl.getRoomId(), pl.getTiming());
         return ResponseEntity.ok().build();
     }
+
     @GetMapping("/getPlayerPos")
     public ResponseEntity<?> getPlayerPos(@RequestParam UUID roomId, @RequestParam UUID authorId) {
         return ResponseEntity.ok(roomSerivce.getActualPlayerPos(roomId, authorId));
     }
-//    @GetMapping("/getParticipants")
-//    public ResponseEntity<?> getPlayerPos(@RequestParam UUID roomId) {
-//        return ResponseEntity.ok(roomSerivce.getParticipants(roomId));
+
+    //    @DeleteMapping("/deleteParticipant/{userId}")
+//    public ResponseEntity<?> deleteParticipant(@PathVariable UUID userId) {
+//        roomSerivce.deleteParticipant(userId);
+//        return ResponseEntity.ok().build();
 //    }
+    @PostMapping("/api/room/leave/{participantId}")
+    public void leave(@PathVariable UUID participantId) {
+        roomSerivce.deleteParticipant(participantId);
+    }
+//    @EventListener
+//    public void onDisconnect(SessionDisconnectEvent e) {
+//        log.info(e.getSessionId());
+//        roomSerivce.deleteParticipant(e.getSessionId());
+//    }
+
+
 }

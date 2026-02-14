@@ -2,41 +2,30 @@ import {useEffect, useRef, useState} from "react";
 import {useWS} from "./services/WebSocketContext";
 
 const TextChat = (props) => {
-    const ws = useWS();
+    const {subscribe, send} = useWS();
     const [messages, setMessages] = useState([]);
     const [text, setText] = useState("");
     const bottomRef = useRef(null);
 
 
     useEffect(() => {
-        if (!ws.current) return;
-        let sub;
-        console.log(props.roomId)
-        ws.current.onConnect = () => {
-            sub = ws.current.subscribe(`/topic/room/${props.roomId}/chat`, mes => {
-                console.log(JSON.parse(mes.body))
-                setMessages(prev => [...prev, JSON.parse(mes.body)]);
-            });
-        };
+        const sub = subscribe(`/topic/room/${props.roomId}/chat`, (msg) => {
+            const chat = JSON.parse(msg.body);
+            setMessages((prev) => [...prev, chat]);
+        });
 
-        return () => {sub?.unsubscribe()
-            console.log("wtf")}
-    }, [ws, props]);
+        return () => sub?.unsubscribe();
+    }, [subscribe, props]);
     useEffect(() => {
         bottomRef.current?.scrollIntoView({behavior: "smooth"});
     }, [messages]);
 
-    const send = () => {
-        if (!ws.current || !ws.current.connected) return;
-
-        ws.current.publish({
+    const sendMessage = () => {
+        if (!text.trim()) return;
+        send({
             destination: `/app/chat.send/${props.roomId}`,
-            headers: {"content-type": "application/json"},
-            body: JSON.stringify({
-                roomId: props.roomId,
-                userId: props.prid,
-                text
-            })
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ roomId: props.roomId, userId: props.prid, text }),
         });
         setText("");
     };
@@ -54,10 +43,10 @@ const TextChat = (props) => {
             <div className="sender">
                 <input value={text} onChange={e => setText(e.target.value)} onKeyPress={event => {
                     if (event.key === 'Enter') {
-                        send()
+                        sendMessage()
                     }
                 }} placeholder="Write Message..."/>
-                <button onClick={send}>Send</button>
+                <button onClick={sendMessage}>Send</button>
             </div>
         </div>
     );

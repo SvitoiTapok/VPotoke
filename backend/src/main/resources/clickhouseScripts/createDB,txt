@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS player_pos
 )
 ENGINE = MergeTree
 ORDER BY (room_id, creation_date)
-TTL creation_date + INTERVAL 24 HOUR
+TTL creation_date + INTERVAL 5 second
 SETTINGS index_granularity = 8192;
 
 
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS playback_events
 )
 ENGINE = MergeTree
 ORDER BY (room_id, creation_date)
-TTL creation_date + INTERVAL 24 HOUR
+TTL creation_date + INTERVAL 6 HOUR
 SETTINGS index_granularity = 8192;
 
 ALTER TABLE tags ADD INDEX tag_name_idx name
