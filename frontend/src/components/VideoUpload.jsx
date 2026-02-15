@@ -27,7 +27,6 @@ function VideoUpload({ onUploadSuccess }) {
         setUploading(true);
         setError('');
         setSuccess('');
-        setProgress(0);
 
         const formData = new FormData();
         formData.append('file', file);
@@ -35,14 +34,34 @@ function VideoUpload({ onUploadSuccess }) {
         try {
             const API_URL = 'http://localhost:8080';
 
-            const response = await fetch(`${API_URL}/api/video/upload`, {
-                method: 'POST',
-                body: formData,
+            // Используем XMLHttpRequest для отслеживания прогресса
+            const xhr = new XMLHttpRequest();
+
+            xhr.upload.addEventListener('progress', (event) => {
+                if (event.lengthComputable) {
+                    const percentComplete = (event.loaded / event.total) * 100;
+                    setProgress(percentComplete);
+                }
             });
 
-            const data = await response.json();
+            const promise = new Promise((resolve, reject) => {
+                xhr.onload = () => {
+                    if (xhr.status === 200) {
+                        resolve(JSON.parse(xhr.response));
+                    } else {
+                        reject(new Error('Upload failed'));
+                    }
+                };
+                xhr.onerror = () => reject(new Error('Network error'));
 
-            if (response.ok && data.success) {
+                xhr.open('POST', `${API_URL}/api/video/upload`);
+                xhr.withCredentials = true;
+                xhr.send(formData);
+            });
+
+            const data = await promise;
+
+            if (data.success) {
                 setProgress(100);
                 setSuccess(`✅ Video uploaded successfully!`);
                 if (onUploadSuccess) {
