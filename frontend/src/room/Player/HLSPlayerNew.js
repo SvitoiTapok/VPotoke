@@ -11,6 +11,7 @@ const HlsPlayerNew = (props) => {
     const [markers, setMarkers] = useState([]);
     const [active, setActive] = useState(false);
     const [isHaveRights, setIsHaveRights] = useState(false);
+    const isRemote = useRef(false);
 
     useEffect(() => {
         setTimeout(() => {
@@ -30,6 +31,47 @@ const HlsPlayerNew = (props) => {
             });
 
             playerRef.current = player;
+            player.on("play", () => {
+                console.log("play")
+                console.log(isRemote.current)
+                if (isRemote.current) {
+                    isRemote.current = false;
+                    return;
+                }
+                send({
+                    destination: `/app/player.play/${props.roomId}`
+                })
+
+            });
+
+            player.on("pause", () => {
+                console.log("pause")
+                console.log(isRemote.current)
+                if (isRemote.current) {
+                    isRemote.current = false;
+                    return;
+                }
+                send({
+                    destination: `/app/player.pause/${props.roomId}`
+                })
+
+            });
+
+            player.on("seeked", () => {
+                console.log("seeked")
+                console.log(isRemote.current)
+                if (isRemote.current) {
+                    isRemote.current = false;
+                    return;
+                }
+                let timing = playerRef.current.currentTime()
+                send({
+                    destination: `/app/player.pos/${props.roomId}`,
+                    headers: {"content-type": "application/json"},
+                    body: JSON.stringify(timing),
+                })
+
+            });
             // setMarkers([
             //     { id: 1, time: 0, type: "event" },
             //     { id: 2, time: 47, type: "warning" },
@@ -61,12 +103,10 @@ const HlsPlayerNew = (props) => {
     useEffect(() => {
         const sub = subscribe(`/topic/room/${props.roomId}/player`, (msg) => {
             const chat = JSON.parse(msg.body);
-            console.log(chat)
             setMarkers(chat);
         });
         let inter = setInterval(() => {
             let timing = Math.floor(playerRef.current.currentTime())
-            console.log("nice")
             send({
                 destination: `/app/player.send/${props.roomId}`,
                 headers: {"content-type": "application/json"},
@@ -79,29 +119,46 @@ const HlsPlayerNew = (props) => {
             clearInterval(inter)
         };
     }, [props]);
+
     useEffect(() => {
-        const sub = subscribe(`/topic/room/${props.roomId}/participants`, (msg) => {
-            const chat = JSON.parse(msg.body);
-            const avatar = chat.find(p => p.id === props.prid);
-            console.log(avatar)
-            setIsHaveRights(avatar.playerRights)
+        console.log("rooom" + props.roomId)
+        const sub1 = subscribe(`/topic/room/${props.roomId}/pause`, (msg) => {
+            isRemote.current = true;
+            playerRef.current.pause()
+            isRemote.current = false;
         });
-        let inter = setTimeout(() => {
-            send({
-                destination: `/app/part.upd/${props.roomId}`
-            })
-        }, 300)
+        const sub2 = subscribe(`/topic/room/${props.roomId}/play`, (msg) => {
+            isRemote.current = true;
+            playerRef.current.play()
+            isRemote.current = false;
+        });
+        const sub3 = subscribe(`/topic/room/${props.roomId}/position`, (msg) => {
+            isRemote.current = true;
+            playerRef.current.currentTime(JSON.parse(msg.body)+5)
+        });
+        const sub4 = subscribe(`/topic/room/${props.roomId}/sync`, (msg) => {
+            setActive(JSON.parse(msg.body))
+        });
+        const sub5 = subscribe(`/topic/room/${props.roomId}/participants`, (msg) => {
+            const chat = JSON.parse(msg.body);
+            if (props.prid) {
+                const avatar = chat.find(p => p.id === props.prid);
+                setIsHaveRights(avatar.playerRights)
+            }
+        });
 
         return () => {
-            sub?.unsubscribe();
-            clearTimeout(inter)
+            sub1?.unsubscribe();
+            sub2?.unsubscribe();
+            sub3?.unsubscribe();
+            sub4?.unsubscribe();
+            sub5?.unsubscribe();
         };
     }, [subscribe, props.prid, props.roomId]);
     useEffect(() => {
         if (playerRef.current) updateMarkers()
     }, [markers]);
     const updateMarkers = () => {
-        console.log(markers)
         const progressEl = playerRef.current.controlBar.progressControl.el();
 
         progressEl.querySelectorAll(".vjs-marker").forEach(el => el.remove());
@@ -122,6 +179,11 @@ const HlsPlayerNew = (props) => {
     const toggle = () => {
         const next = !active;
         setActive(next);
+        if (next) {
+            roomService.sendSyncOnRequest(props.roomId, props.prid, playerRef.current.currentTime())
+        } else {
+            roomService.sendSyncOffRequest(props.roomId, props.prid)
+        }
     };
     return (
         <div data-vjs-player>
@@ -131,17 +193,18 @@ const HlsPlayerNew = (props) => {
             />
             {isHaveRights && (
                 <div>
-                <span>Синхронный режим:</span>
-                <button
-                className={`toggle-btn ${active ? "on" : "off"}`}
-             onClick={toggle}
-        >
-            {active ? "ON" : "OFF"}
-                </button></div>)
-}
+                    <span>Синхронный режим:</span>
+                    <button
+                        className={`toggle-btn ${active ? "on" : "off"}`}
+                        onClick={toggle}
+                    >
+                        {active ? "ON" : "OFF"}
+                    </button>
+                </div>)
+            }
 
-</div>
-)
-    ;
+        </div>
+    )
+        ;
 }
 export default HlsPlayerNew

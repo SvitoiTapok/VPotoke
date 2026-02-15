@@ -1,5 +1,3 @@
-import {data} from "react-router-dom";
-
 const API_BASE_URL = 'http://localhost:8080/room/api';
 const roomService = {
     getSessionId: ()=> {
@@ -83,7 +81,14 @@ const roomService = {
             }
             throw error;
         }
+    },
+    sendSyncOnRequest: async (roomId, userId, pos) => {
+        return await fetch(`${API_BASE_URL}/OnSyncMode?roomId=${roomId}&userId=${userId}&pos=${pos}`)
+    },
+    sendSyncOffRequest: async (roomId, userId) => {
+        return await fetch(`${API_BASE_URL}/OffSyncMode?roomId=${roomId}&userId=${userId}`)
     }
+
 
 };
 

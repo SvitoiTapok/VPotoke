@@ -5,7 +5,9 @@ import com.example.backend.entities.Participant;
 import com.example.backend.services.RoomSerivce;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.NotFound;
 import org.springframework.context.event.EventListener;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -93,6 +95,77 @@ public class RoomController {
                 roomSerivce.getAllParticipants(id)
         );
         return ResponseEntity.ok().build();
+    }
+    @GetMapping("/OnSyncMode")
+    public ResponseEntity<?> onSyncMode(@RequestParam UUID roomId, @RequestParam UUID userId, @RequestParam float pos) {
+        log.info("onSyncMode");
+        if(roomSerivce.changeMode(roomId, userId, true)){
+            sendSync(roomId, true);
+            sendPosition(roomId, pos);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.badRequest().build();
+    }
+    @GetMapping("/OffSyncMode")
+    public ResponseEntity<?> offSyncMode(@RequestParam UUID roomId, @RequestParam UUID userId) {
+        log.info("offSyncMode");
+        if(roomSerivce.changeMode(roomId, userId, false)){
+            sendSync(roomId, false);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.badRequest().build();
+    }
+
+    @MessageMapping("/player.pause/{roomId}")
+    public void handlePause(
+            @DestinationVariable UUID roomId
+    ) {
+        log.info("handlePause by roomId: {}", roomId);
+        if(roomSerivce.getSync(roomId)) sendPause(roomId);
+
+    }
+    @MessageMapping("/player.play/{roomId}")
+    public void handlePlay(
+            @DestinationVariable UUID roomId
+    ) {
+        log.info("handlePlay by roomId: {}", roomId);
+        if(roomSerivce.getSync(roomId)) sendPlay(roomId);
+    }
+    @MessageMapping("/player.pos/{roomId}")
+    public void handlePosition(
+            @DestinationVariable UUID roomId,
+            @Payload float pos
+    ) {
+        log.info("handlePos by roomId: {}", roomId);
+        if(roomSerivce.getSync(roomId)) sendPosition(roomId, pos);
+    }
+    private void sendPause(UUID roomId) {
+        messagingTemplate.convertAndSend(
+                "/topic/room/" + roomId + "/pause",
+                ""
+
+        );
+    }
+    private void sendPlay(UUID roomId) {
+        messagingTemplate.convertAndSend(
+                "/topic/room/" + roomId + "/play",
+                ""
+
+        );
+    }
+    private void sendPosition(UUID roomId, float pos) {
+        messagingTemplate.convertAndSend(
+                "/topic/room/" + roomId + "/position",
+                pos
+
+        );
+    }
+    private void sendSync(UUID roomId, boolean mode) {
+        messagingTemplate.convertAndSend(
+                "/topic/room/" + roomId + "/sync",
+                mode
+
+        );
     }
     //    @DeleteMapping("/deleteParticipant/{userId}")
 //    public ResponseEntity<?> deleteParticipant(@PathVariable UUID userId) {

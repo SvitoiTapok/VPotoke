@@ -28,6 +28,8 @@ public class Room {
     private String description;
     @Column(columnDefinition = "VARCHAR(256)")
     private String link;
+    @Column
+    private Boolean isSync;
 
     @ManyToOne
     @JoinColumn(name="user_id", nullable = false, referencedColumnName = "id")

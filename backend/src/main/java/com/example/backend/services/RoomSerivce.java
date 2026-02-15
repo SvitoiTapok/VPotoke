@@ -134,6 +134,20 @@ public class RoomSerivce {
         p.setNickname(name);
         participantRepository.save(p);
     }
+    public boolean changeMode(UUID roomId, UUID authorId, boolean mode){
+        Participant p = participantRepository.findById(authorId).orElseThrow(NoSuchElementException::new);
+        if(p.getPlayer_rights()){
+            Room r = roomRepository.findById(roomId).orElseThrow(NoSuchElementException::new);
+            r.setIsSync(mode);
+            roomRepository.save(r);
+            return true;
+        }else {
+            return false;
+        }
+    }
+    public boolean getSync(UUID roomId){
+        return roomRepository.findById(roomId).orElseThrow(NoSuchElementException::new).getIsSync();
+    }
 //    public void deleteParticipant(String sessionId){
 //        Participant p = participantRepository.findBySessionId(sessionId).orElseThrow(NoSuchElementException::new);
 //        participantRepository.delete(p);

@@ -12,14 +12,13 @@ const Participants = (props) => {
 
     useEffect(() => {
         const sub = subscribe(`/topic/room/${props.roomId}/participants`, (msg) => {
-            const chat = JSON.parse(msg.body);
-            const avatar = chat.find(p => p.id === props.prid);
-            const others = chat.filter(p => p.id !== props.prid);
-            setAvatar(avatar);
-            setParticipants(others);
-            console.log("id " + props.prid)
-            console.log(avatar)
-            console.log(others)
+            if(props.prid) {
+                const chat = JSON.parse(msg.body);
+                const avatar = chat.find(p => p.id === props.prid);
+                const others = chat.filter(p => p.id !== props.prid);
+                setAvatar(avatar);
+                setParticipants(others);
+            }
         });
         let inter = setTimeout(() => {
             send({
