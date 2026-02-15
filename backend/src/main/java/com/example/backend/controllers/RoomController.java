@@ -1,6 +1,6 @@
 package com.example.backend.controllers;
 
-import com.example.backend.DTO.*;
+import com.example.backend.dto.*;
 import com.example.backend.services.RoomSerivce;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;

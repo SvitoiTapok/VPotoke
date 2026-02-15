@@ -8,25 +8,19 @@ import roomService from "./services/RoomService";
 import Participants from "./Participants";
 import LeaveButton from "./LeaveButton";
 
-const RoomMain = () => {
+const RoomMain = (props) => {
+    const [prid, setPrid] = useState(null)
+    const pridRef = useRef(false)
+    const API_URL = 'http://localhost:8080';
     const { roomId } = useParams();
     const navigate = useNavigate();
     const [room, setRoom] = useState(null);
-    const [participants, setParticipants] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [messages, setMessages] = useState([]);
     const [messageInput, setMessageInput] = useState('');
     const ws = useRef(null);
     const hasJoined = useRef(false); // Флаг, чтобы не join-ить много раз
-
-const RoomMain = (props) => {
-    const [participants] = useState([
-        'Алексей', 'Мария', 'Иван', 'Ольга'
-    ]);
-    const [prid, setPrid] = useState(null)
-    const pridRef = useRef(false)
-    const API_URL = 'http://localhost:8080';
 
     const handlerRef = useRef(null);
     //========================================================
@@ -50,12 +44,12 @@ const RoomMain = (props) => {
         roomService.getOrCreateParticipant(props.roomId).then(id => {
             setPrid(id);
             pridRef.current = id;
+        })
         // Когда комната загружена и мы ещё не присоединились
         // if (room && !hasJoined.current) {
         //     joinRoom();
         //     hasJoined.current = true;
-        // }
-    }, [room]); // Зависимость от room
+        }, [room]); // Зависимость от room
 
     //=============================================================
     const fetchRoom = async () => {
@@ -69,14 +63,6 @@ const RoomMain = (props) => {
                 console.log('Room data:', data);
                 setRoom(data);
 
-                setParticipants([
-                    {
-                        id: data.moderatorId,
-                        name: data.moderatorLogin,
-                        isModerator: true,
-                        position: '0:00'
-                    }
-                ]);
             } else {
                 setError('Room not found');
             }

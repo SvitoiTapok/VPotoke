@@ -1,7 +1,5 @@
 package com.example.backend.repositories;
 
-import com.example.backend.DTO.PlayerPosInputDTO;
-import com.example.backend.entities.ChatMessage;
 import com.example.backend.entities.PlayerPos;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;

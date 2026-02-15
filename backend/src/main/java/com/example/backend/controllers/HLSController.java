@@ -1,16 +1,11 @@
 package com.example.backend.controllers;
 
-import com.example.backend.DTO.ChatMessageInputDTO;
-import com.example.backend.DTO.ChatMessageOutputDTO;
-import com.example.backend.DTO.PlayerPosInputDTO;
-import com.example.backend.DTO.PlayerPosOutputDTO;
+import com.example.backend.dto.PlayerPosInputDTO;
+import com.example.backend.dto.PlayerPosOutputDTO;
 import com.example.backend.s3api.YandexService;
 import com.example.backend.services.RoomSerivce;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.MessageSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

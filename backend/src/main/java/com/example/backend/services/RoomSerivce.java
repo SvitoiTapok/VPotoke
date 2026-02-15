@@ -1,16 +1,14 @@
 package com.example.backend.services;
 
-import com.example.backend.DTO.ChatMessageInputDTO;
-import com.example.backend.DTO.ChatMessageOutputDTO;
-import com.example.backend.DTO.ParticipantDTO;
-import com.example.backend.DTO.PlayerPosOutputDTO;
+import com.example.backend.dto.ChatMessageInputDTO;
+import com.example.backend.dto.ChatMessageOutputDTO;
+import com.example.backend.dto.ParticipantDTO;
+import com.example.backend.dto.PlayerPosOutputDTO;
 import com.example.backend.entities.*;
 import com.example.backend.repositories.*;
 import com.example.backend.util.ColorUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
