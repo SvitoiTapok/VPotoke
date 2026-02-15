@@ -1,58 +1,82 @@
-// import {useEffect, useState} from 'react';
-//
-// import './Room.css';
-// import TextChat from "./TextChat";
-// import HlsPlayerNew from "./Player/HLSPlayerNew";
-// import roomService from "./services/RoomService";
-//
-// const RoomMain = (props) => {
-//     const [participants, setParticipants] = useState([
-//         'Алексей', 'Мария', 'Иван', 'Ольга'
-//     ]);
-//     useEffect(() => {
-//         if(prid||mon) return
-//         setMon(true);
-//         roomService.getOrCreateParticipant(props.roomId).then((data) => setPrid(data))
-//
-//         return () => {setMon(false)};
-//     }, [prid, mon])
-//     return (
-//         <div className="room-container">
-//
-//
-//             <main className="main-area">
-//                 <div className="video-area">
-//                     <HlsPlayerNew prid={prid} roomId={props.roomId}/>
-//                 </div>
-//                 <div className="chat-area">
-//                     <TextChat prid={prid} roomId={props.roomId}/>
-//                 </div>
-//             </main>
-//             <aside className="participants">
-//                 <h2>Участники</h2>
-//                 <ul>
-//                     {participants.map((p, i) => (
-//                         <li key={i}>{p}</li>
-//                     ))}
-//                 </ul>
-//             </aside>
-//
-//
-//         </div>
-//     )
-//         ;
-// }
-//
-//
-// // const RoomMain = () => {
-// //     const PATH = "http://localhost:8080/api/video/stream"
-// //     return (
-// //         <video
-// //             width="720"
-// //             controls
-// //             preload="metadata"
-// //             src={PATH}
-// //         />
-// //     );
-// // }
-// export default RoomMain;
+import {useEffect, useRef, useState} from "react";
+import {useWS} from "./services/WebSocketContext";
+import roomService from "./services/RoomService";
+
+const Participants = (props) => {
+    const {subscribe, send} = useWS();
+    const [participants, setParticipants] = useState([]);
+    const [avatar, setAvatar] = useState(null);
+    const [name, setName] = useState("")
+    const [editing, setEditing] = useState(false);
+
+
+    useEffect(() => {
+        const sub = subscribe(`/topic/room/${props.roomId}/participants`, (msg) => {
+            const chat = JSON.parse(msg.body);
+            const avatar = chat.find(p => p.id === props.prid);
+            const others = chat.filter(p => p.id !== props.prid);
+            setAvatar(avatar);
+            setParticipants(others);
+            console.log("id " + props.prid)
+            console.log(avatar)
+            console.log(others)
+        });
+        let inter = setTimeout(() => {
+            send({
+                destination: `/app/part.upd/${props.roomId}`
+            })
+        }, 300)
+
+        return () => {
+            sub?.unsubscribe();
+            clearTimeout(inter)
+        };
+    }, [subscribe, props.prid, props.roomId]);
+
+    const handleSaveName = () => {
+        if (!name.trim()) return;
+
+        roomService.updateName(props.prid, name).then(r => {
+            setAvatar({...avatar, name: name});
+            setEditing(false);
+        })
+
+    };
+
+    return (
+        <aside className="participants">
+            <h2>Вы</h2>
+            {avatar && (
+                <li key={avatar.id} className="participant" onClick={() => setEditing(true)}>
+                    <span className="avatar" style={{backgroundColor: avatar.color}}/>
+                    {editing ? (
+                        <div className="edit-name">
+                            <input
+                                type="text"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                onKeyDown={(e) => e.key === "Enter" && handleSaveName()}
+                                placeholder="Введите имя"
+                            />
+                            <button onClick={handleSaveName}>Сохранить</button>
+                        </div>
+                    ) : (
+                        <span className="name">{avatar.name}</span>
+                    )}
+                </li>
+            )}
+
+            <h2>Остальные участники</h2>
+            <ul className="participants-list">
+                {participants.map((part) => (
+                    <li key={part.id} className="participant">
+                        <span className="avatar" style={{backgroundColor: part.color}}/>
+                        <span className="name">{part.name}</span>
+                    </li>
+                ))}
+            </ul>
+        </aside>
+    );
+
+}
+export default Participants;

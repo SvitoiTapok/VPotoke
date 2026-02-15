@@ -37,7 +37,7 @@ public class HLSController {
     public ResponseEntity<byte[]> getHlsFile(@PathVariable String filename) {
 
         byte[] data = s3.getFile("hls_test2/" + filename);
-        log.info("HLS File: {}", filename);
+        //log.info("HLS File: {}", filename);
         MediaType type = filename.endsWith(".m3u8")
                 ? MediaType.valueOf("application/vnd.apple.mpegurl")
                 : MediaType.valueOf("video/MP2T");
@@ -54,10 +54,14 @@ public class HLSController {
     ) {
         roomSerivce.registerPlayerPos(pos.getAuthorId(), pos.getRoomId(), pos.getTiming());
         List<PlayerPosOutputDTO> ans = roomSerivce.getActualPlayerPos(pos.getRoomId(), pos.getAuthorId());
-        log.info("Sending PlayerPos: {}", ans.size());
+        //log.info("Sending PlayerPos: {}", ans.size());
         messagingTemplate.convertAndSend(
                 "/topic/room/" + roomId + "/player",
                 ans
+        );
+        messagingTemplate.convertAndSend(
+                "/topic/room/" + roomId + "/participants",
+                roomSerivce.getAllParticipants(roomId)
         );
     }
 }

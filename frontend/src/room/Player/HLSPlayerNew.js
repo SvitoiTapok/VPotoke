@@ -9,6 +9,8 @@ const HlsPlayerNew = (props) => {
     const videoRef = useRef(null);
     const playerRef = useRef(null);
     const [markers, setMarkers] = useState([]);
+    const [active, setActive] = useState(false);
+    const [isHaveRights, setIsHaveRights] = useState(false);
 
     useEffect(() => {
         setTimeout(() => {
@@ -61,20 +63,43 @@ const HlsPlayerNew = (props) => {
             const chat = JSON.parse(msg.body);
             console.log(chat)
             setMarkers(chat);
-            updateMarkers()
         });
-        let inter = setInterval(()=>{
+        let inter = setInterval(() => {
             let timing = Math.floor(playerRef.current.currentTime())
             console.log("nice")
             send({
                 destination: `/app/player.send/${props.roomId}`,
-                headers: { "content-type": "application/json" },
-                body: JSON.stringify({ authorId: props.prid, roomId: props.roomId, timing: timing }),
+                headers: {"content-type": "application/json"},
+                body: JSON.stringify({authorId: props.prid, roomId: props.roomId, timing: timing}),
             })
         }, 1000)
 
-        return () => {sub?.unsubscribe(); clearInterval(inter)};
-    }, [subscribe, props, markers]);
+        return () => {
+            sub?.unsubscribe();
+            clearInterval(inter)
+        };
+    }, [props]);
+    useEffect(() => {
+        const sub = subscribe(`/topic/room/${props.roomId}/participants`, (msg) => {
+            const chat = JSON.parse(msg.body);
+            const avatar = chat.find(p => p.id === props.prid);
+            console.log(avatar)
+            setIsHaveRights(avatar.playerRights)
+        });
+        let inter = setTimeout(() => {
+            send({
+                destination: `/app/part.upd/${props.roomId}`
+            })
+        }, 300)
+
+        return () => {
+            sub?.unsubscribe();
+            clearTimeout(inter)
+        };
+    }, [subscribe, props.prid, props.roomId]);
+    useEffect(() => {
+        if (playerRef.current) updateMarkers()
+    }, [markers]);
     const updateMarkers = () => {
         console.log(markers)
         const progressEl = playerRef.current.controlBar.progressControl.el();
@@ -94,13 +119,29 @@ const HlsPlayerNew = (props) => {
         });
     }
 
+    const toggle = () => {
+        const next = !active;
+        setActive(next);
+    };
     return (
         <div data-vjs-player>
             <video
                 ref={videoRef}
                 className="video-js vjs-default-skin"
             />
-        </div>
-    );
+            {isHaveRights && (
+                <div>
+                <span>Синхронный режим:</span>
+                <button
+                className={`toggle-btn ${active ? "on" : "off"}`}
+             onClick={toggle}
+        >
+            {active ? "ON" : "OFF"}
+                </button></div>)
+}
+
+</div>
+)
+    ;
 }
 export default HlsPlayerNew

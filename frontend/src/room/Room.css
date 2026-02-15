@@ -106,3 +106,144 @@
 
 .marker.goal { background: lime; }
 .marker.warning { background: red; }
+/* Participants */
+
+.participants {
+    width: 250px;
+    padding: 16px;
+    background-color: #0d1b2a; /* темно-синий фон */
+    color: #e0e1dd; /* светлый текст */
+    border-radius: 8px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.participants h2 {
+    font-size: 16px;
+    margin-bottom: 8px;
+    color: #ffa500; /* оранжевый заголовок */
+    border-bottom: 1px solid #1b263b;
+    padding-bottom: 4px;
+}
+
+.participants ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.participant {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 6px;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+}
+
+.participant:hover {
+    background-color: rgba(255, 165, 0, 0.1); /* легкий оранжевый hover */
+}
+
+.avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin-right: 10px;
+    flex-shrink: 0;
+    border: 2px solid #ffa500; /* оранжевая рамка аватара */
+}
+
+.name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #f0f0f0;
+}
+
+.participants > li:first-child {
+    background-color: #1b263b;
+    padding: 6px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+}
+
+/*изменение имени*/
+.edit-name {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-top: 4px;
+}
+
+.edit-name input {
+    font-size: 14px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    border: 1px solid #ffa500;
+    background-color: #1b263b;
+    color: #f0f0f0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.edit-name button {
+    font-size: 14px;
+    padding: 4px 8px;
+    margin-top: 4px;
+    border: none;
+    border-radius: 4px;
+    background-color: #ffa500;
+    color: #0d1b2a;
+    cursor: pointer;
+}
+
+.edit-name button:hover {
+    background-color: #ffb733;
+}
+/*button*/
+.leave-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #ff4d4f;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    transition: background-color 0.2s ease;
+    z-index: 1000;
+}
+
+.leave-button:hover {
+    background-color: #ff7875;
+}
+.toggle-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 80px;
+    font-weight: bold;
+}
+
+/*кнопка режима просмотра*/
+.toggle-btn.on {
+    background-color: #28a745;
+    color: white;
+    box-shadow: 0 0 8px rgba(40, 167, 69, 0.6);
+}
+
+/* ВЫКЛ */
+.toggle-btn.off {
+    background-color: #dc3545;
+    color: white;
+    box-shadow: 0 0 8px rgba(220, 53, 69, 0.6);
+}
+
+.toggle-btn:hover {
+    transform: scale(1.05);
+}

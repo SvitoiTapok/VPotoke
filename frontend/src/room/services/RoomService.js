@@ -55,6 +55,10 @@ const roomService = {
             throw error;
         }
     },
+    updateName: async (authorId, name) => {
+        const response = await fetch(`${API_BASE_URL}/updateName?authorId=${authorId}&name=${name}`);
+    },
+
     getParticipants: async (roomId) => {
         try {
             const response = await fetch(`${API_BASE_URL}/getParticipants?roomID=${roomId}`);

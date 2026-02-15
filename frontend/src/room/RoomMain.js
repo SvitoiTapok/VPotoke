@@ -4,6 +4,8 @@ import './Room.css';
 import TextChat from "./TextChat";
 import HlsPlayerNew from "./Player/HLSPlayerNew";
 import roomService from "./services/RoomService";
+import Participants from "./Participants";
+import LeaveButton from "./LeaveButton";
 
 const RoomMain = (props) => {
     const [participants] = useState([
@@ -19,27 +21,29 @@ const RoomMain = (props) => {
             setPrid(id);
             pridRef.current = id;
 
-            handlerRef.current = () => {
-                navigator.sendBeacon(
-                    `http://localhost:8080/room/api/leave/${id}`
-                );
-            };
-
-            window.addEventListener("pagehide", handlerRef.current);
-            window.addEventListener("beforeunload", handlerRef.current);
+            // handlerRef.current = () => {
+            //     navigator.sendBeacon(
+            //         `http://localhost:8080/room/api/leave/${id}/${props.roomId}`
+            //     );
+            // };
+            //
+            // //window.addEventListener("pagehide", handlerRef.current);
+            // window.addEventListener("beforeunload", handlerRef.current);
         });
 
-        return () => {
-            if (handlerRef.current) {
-                window.removeEventListener("pagehide", handlerRef.current);
-                window.removeEventListener("beforeunload", handlerRef.current);
-            }
-        };
-    }, [props.roomId]);
+        // return () => {
+        //     if (handlerRef.current) {
+        //         //window.removeEventListener("pagehide", handlerRef.current);
+        //         window.removeEventListener("beforeunload", handlerRef.current);
+        //     }
+        // };
+    }, [props]);
+
 
 
     return (
         <div className="room-container">
+            <LeaveButton/>
 
 
             <main className="main-area">
@@ -50,14 +54,7 @@ const RoomMain = (props) => {
                     <TextChat prid={prid} roomId={props.roomId}/>
                 </div>
             </main>
-            <aside className="participants">
-                <h2>Участники</h2>
-                <ul>
-                    {participants.map((p, i) => (
-                        <li key={i}>{p}</li>
-                    ))}
-                </ul>
-            </aside>
+            <Participants prid={prid} roomId={props.roomId}/>
 
 
         </div>

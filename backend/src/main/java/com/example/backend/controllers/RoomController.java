@@ -1,13 +1,20 @@
 package com.example.backend.controllers;
 
-import com.example.backend.DTO.PlayerPosInputDTO;
+import com.example.backend.DTO.*;
+import com.example.backend.entities.Participant;
 import com.example.backend.services.RoomSerivce;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
@@ -15,45 +22,39 @@ import java.util.UUID;
 @RestController
 @CrossOrigin(origins = "*")
 @RequestMapping("/room/api")
+@RequiredArgsConstructor
 public class RoomController {
 
     private final RoomSerivce roomSerivce;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    public RoomController(RoomSerivce roomSerivce) {
-        this.roomSerivce = roomSerivce;
-    }
 
     @GetMapping("/newParticipant")
     public ResponseEntity<UUID> newParticipant(@RequestParam UUID roomId, @RequestParam String sessionId) {
         try {
             UUID id = roomSerivce.newParticipant(roomId, sessionId);
+            messagingTemplate.convertAndSend(
+                    "/topic/room/" + roomId + "/participants",
+                    roomSerivce.getAllParticipants(roomId)
+            );
             return ResponseEntity.ok().body(id);
         } catch (NoSuchElementException e) {
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
+            log.error("newParticipant failed", e);
             return ResponseEntity.badRequest().build();
         }
 
-//        Participant newParticipant = new Participant();
-//        Room room =
-//        newParticipant.setRoom(roomId);
-//
-//        byte[] data = s3.getFile("hls_test2/" + filename);
-//        log.info("HLS File: {}", filename);
-//        MediaType type = filename.endsWith(".m3u8")
-//                ? MediaType.valueOf("application/vnd.apple.mpegurl")
-//                : MediaType.valueOf("video/MP2T");
-//
-//        return ResponseEntity.ok()
-//                .header(HttpHeaders.CACHE_CONTROL, "no-cache")
-//                .contentType(type)
-//                .body(data);
     }
 
     @GetMapping("/newParticipantWithName")
     public ResponseEntity<UUID> newParticipantWithName(@RequestParam UUID roomId, @RequestParam String name, @RequestParam String sessionId) {
         try {
             UUID id = roomSerivce.newParticipantWithName(roomId, name, sessionId);
+            messagingTemplate.convertAndSend(
+                    "/topic/room/" + roomId + "/participants",
+                    roomSerivce.getAllParticipants(roomId)
+            );
             return ResponseEntity.ok().body(id);
         } catch (NoSuchElementException e) {
             return ResponseEntity.notFound().build();
@@ -73,21 +74,40 @@ public class RoomController {
         return ResponseEntity.ok(roomSerivce.getActualPlayerPos(roomId, authorId));
     }
 
+    @MessageMapping("/part.upd/{roomId}")
+    public void updateParticipants(
+            @DestinationVariable UUID roomId
+    ) {
+        messagingTemplate.convertAndSend(
+                "/topic/room/" + roomId + "/participants",
+                roomSerivce.getAllParticipants(roomId)
+        );
+    }
+
+    @GetMapping("/updateName")
+    public ResponseEntity<?> updateName(@RequestParam UUID authorId, @RequestParam String name) {
+        UUID id = roomSerivce.getParticipant(authorId).getRoom().getId();
+        roomSerivce.updateName(authorId, name);
+        messagingTemplate.convertAndSend(
+                "/topic/room/" + id + "/participants",
+                roomSerivce.getAllParticipants(id)
+        );
+        return ResponseEntity.ok().build();
+    }
     //    @DeleteMapping("/deleteParticipant/{userId}")
 //    public ResponseEntity<?> deleteParticipant(@PathVariable UUID userId) {
 //        roomSerivce.deleteParticipant(userId);
 //        return ResponseEntity.ok().build();
 //    }
-    @PostMapping(value = "/leave/{participantId}", consumes = "*/*")
-    public ResponseEntity<Void> leave(@PathVariable UUID participantId) {
-        log.info("LEAVE {}", participantId);
-        roomSerivce.deleteParticipant(participantId);
-        return ResponseEntity.ok().build();
-    }
-//    @EventListener
-//    public void onDisconnect(SessionDisconnectEvent e) {
-//        log.info(e.getSessionId());
-//        roomSerivce.deleteParticipant(e.getSessionId());
+//    @PostMapping(value = "/leave/{participantId}/{roomId}", consumes = "*/*")
+//    public ResponseEntity<Void> leave(@PathVariable UUID participantId, @PathVariable UUID roomId) {
+//        log.info("LEAVE {}", participantId);
+//        roomSerivce.deleteParticipant(participantId);
+//        messagingTemplate.convertAndSend(
+//                "/topic/room/" + roomId + "/participants",
+//                roomSerivce.getAllParticipants(roomId)
+//        );
+//        return ResponseEntity.ok().build();
 //    }
 
 

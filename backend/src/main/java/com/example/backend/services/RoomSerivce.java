@@ -2,6 +2,7 @@ package com.example.backend.services;
 
 import com.example.backend.DTO.ChatMessageInputDTO;
 import com.example.backend.DTO.ChatMessageOutputDTO;
+import com.example.backend.DTO.ParticipantDTO;
 import com.example.backend.DTO.PlayerPosOutputDTO;
 import com.example.backend.entities.ChatMessage;
 import com.example.backend.entities.Participant;
@@ -12,7 +13,9 @@ import com.example.backend.repositories.ParticipantRepository;
 import com.example.backend.repositories.PlayerPosRepository;
 import com.example.backend.repositories.RoomRepository;
 import com.example.backend.util.ColorUtil;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -23,18 +26,13 @@ import java.util.*;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class RoomSerivce {
     private final MessageRepository messageRepository;
     private final ParticipantRepository participantRepository;
     private final RoomRepository roomRepository;
     private final PlayerPosRepository playerPosRepository;
 
-    public RoomSerivce(MessageRepository messageRepository, ParticipantRepository participantRepository, RoomRepository roomRepository, PlayerPosRepository playerPosRepository) {
-        this.messageRepository = messageRepository;
-        this.participantRepository = participantRepository;
-        this.roomRepository = roomRepository;
-        this.playerPosRepository = playerPosRepository;
-    }
 
 
     public ChatMessageOutputDTO saveMessage(ChatMessageInputDTO input){
@@ -61,7 +59,9 @@ public class RoomSerivce {
         p.setPlayer_rights(true);
         p.setMessage_rights(true);
         p.setSessionId(sessionId);
-        return participantRepository.save(p).getId();
+        UUID id = participantRepository.save(p).getId();
+        playerPosRepository.save(id, roomId, 0);
+        return id;
     }
 
     public UUID newParticipantWithName(UUID roomId, String name, String sessionId){
@@ -84,7 +84,7 @@ public class RoomSerivce {
         playerPosRepository.save(authorId, roomId, timing);
     }
     public List<PlayerPosOutputDTO> getActualPlayerPos(UUID roomId, UUID authorId){
-        return playerPosRepository.getLastPos(roomId, authorId).stream().map((PlayerPos p) -> {
+        return playerPosRepository.getLastPos(roomId).stream().map((PlayerPos p) -> {
             PlayerPosOutputDTO ans = new PlayerPosOutputDTO();
             ans.setTiming(p.getTiming());
             try {
@@ -99,6 +99,7 @@ public class RoomSerivce {
     }
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void deleteParticipant(UUID authorId){
+
         try {
             participantRepository.deleteById(authorId);
         }catch (Exception ignored) {}
@@ -107,6 +108,31 @@ public class RoomSerivce {
 
 
 
+    }
+    public Participant getParticipant(UUID authorId){
+        try {
+            return participantRepository.findById(authorId).orElseThrow(NoSuchElementException::new);
+        }catch (NoSuchElementException e){
+            return null;
+        }
+    }
+    public List<ParticipantDTO> getAllParticipants(UUID roomId){
+        List<UUID> l = playerPosRepository.getLastPos(roomId).stream().map(PlayerPos::getAuthorId).toList();
+        return participantRepository.findByRoomId(roomId).stream().map((participant -> {
+            if(!l.contains(participant.getId())){
+                log.info("deleting participant {}", participant.getId());
+                participantRepository.deleteById(participant.getId());
+                return null;
+            }
+            log.info(participant.getId().toString());
+            return new ParticipantDTO(participant.getNickname(), participant.getColor(), participant.getId().toString(), participant.getPlayer_rights(), participant.getMessage_rights(), participant.getAdmin());
+        })).filter(Objects::nonNull).toList();
+    }
+    public void updateName(UUID authorId, String name){
+        log.info("updating name {} {}", name, authorId);
+        Participant p = participantRepository.findById(authorId).orElseThrow(NoSuchElementException::new);
+        p.setNickname(name);
+        participantRepository.save(p);
     }
 //    public void deleteParticipant(String sessionId){
 //        Participant p = participantRepository.findBySessionId(sessionId).orElseThrow(NoSuchElementException::new);

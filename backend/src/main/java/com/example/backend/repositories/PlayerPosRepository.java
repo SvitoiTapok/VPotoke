@@ -27,7 +27,7 @@ public class PlayerPosRepository {
         );
     }
 
-    public List<PlayerPos> getLastPos(UUID roomID, UUID authorID) {
+    public List<PlayerPos> getLastPos(UUID roomID) {
         return jdbc.query("""
             SELECT author_id, argMax(timing, creation_date) AS last_timing
             FROM player_pos
