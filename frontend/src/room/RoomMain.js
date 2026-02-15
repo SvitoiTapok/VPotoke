@@ -10,36 +10,34 @@ const RoomMain = (props) => {
         'Алексей', 'Мария', 'Иван', 'Ольга'
     ]);
     const [prid, setPrid] = useState(null)
-    const mon = useRef(false)
+    const pridRef = useRef(false)
 
-    const pridRef = useRef(null);
-
-    useEffect(() => {
-        roomService.getOrCreateParticipant(props.roomId)
-            .then(id => {
-                setPrid(id);
-                pridRef.current = id;
-            });
-    }, [props.roomId]);
+    const handlerRef = useRef(null);
 
     useEffect(() => {
-        const handler = () => {
-            if (mon.current) return;
-            mon.current = true;
+        roomService.getOrCreateParticipant(props.roomId).then(id => {
+            setPrid(id);
+            pridRef.current = id;
 
-            const data = JSON.stringify(payload);
-            const blob = new Blob([data], { type: "application/json" });
-            navigator.sendBeacon(url, blob);
-        };
+            handlerRef.current = () => {
+                navigator.sendBeacon(
+                    `http://localhost:8080/room/api/leave/${id}`
+                );
+            };
 
-        window.addEventListener("pagehide", handler);
-        window.addEventListener("beforeunload", handler);
+            window.addEventListener("pagehide", handlerRef.current);
+            window.addEventListener("beforeunload", handlerRef.current);
+        });
 
         return () => {
-            window.removeEventListener("pagehide", handler);
-            window.removeEventListener("beforeunload", handler);
+            if (handlerRef.current) {
+                window.removeEventListener("pagehide", handlerRef.current);
+                window.removeEventListener("beforeunload", handlerRef.current);
+            }
         };
-    }, []);
+    }, [props.roomId]);
+
+
     return (
         <div className="room-container">
 

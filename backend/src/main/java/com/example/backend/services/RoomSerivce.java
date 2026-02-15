@@ -13,11 +13,13 @@ import com.example.backend.repositories.PlayerPosRepository;
 import com.example.backend.repositories.RoomRepository;
 import com.example.backend.util.ColorUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.logging.Logger;
 
 @Service
 @Slf4j
@@ -53,6 +55,7 @@ public class RoomSerivce {
         Participant p = new Participant();
         Room r = roomRepository.findById(roomId).orElseThrow(NoSuchElementException::new);
         p.setRoom(r);
+        p.setAdmin(false);
         p.setNickname("Participant " + UUID.randomUUID());
         p.setColor(ColorUtil.randomNiceColor());
         p.setPlayer_rights(true);
@@ -67,6 +70,7 @@ public class RoomSerivce {
             return existing.get().getId();
         }
         Participant p = new Participant();
+        p.setAdmin(true);
         Room r = roomRepository.findById(roomId).orElseThrow(NoSuchElementException::new);
         p.setRoom(r);
         p.setNickname(name);
@@ -83,16 +87,26 @@ public class RoomSerivce {
         return playerPosRepository.getLastPos(roomId, authorId).stream().map((PlayerPos p) -> {
             PlayerPosOutputDTO ans = new PlayerPosOutputDTO();
             ans.setTiming(p.getTiming());
-            Participant author = Objects.requireNonNull(participantRepository.findById(p.getAuthorId()).orElse(null));
-            ans.setName(author.getNickname());
-            ans.setColor(author.getColor());
+            try {
+                Participant author = Objects.requireNonNull(participantRepository.findById(p.getAuthorId()).orElseThrow(NoSuchElementException::new));
+                ans.setName(author.getNickname());
+                ans.setColor(author.getColor());
+            }catch (NoSuchElementException e){
+                return null;
+            }
             return ans;
-        }).toList();
+        }).filter(Objects::nonNull).toList();
     }
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public void deleteParticipant(UUID authorId){
-        Participant p = participantRepository.findById(authorId).orElseThrow(NoSuchElementException::new);
-        participantRepository.delete(p);
-        log.info("Deleted participant " + authorId);
+        try {
+            participantRepository.deleteById(authorId);
+        }catch (Exception ignored) {}
+
+        log.info("Deleted participant {}", authorId);
+
+
+
     }
 //    public void deleteParticipant(String sessionId){
 //        Participant p = participantRepository.findBySessionId(sessionId).orElseThrow(NoSuchElementException::new);

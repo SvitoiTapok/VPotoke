@@ -78,9 +78,11 @@ public class RoomController {
 //        roomSerivce.deleteParticipant(userId);
 //        return ResponseEntity.ok().build();
 //    }
-    @PostMapping("/api/room/leave/{participantId}")
-    public void leave(@PathVariable UUID participantId) {
+    @PostMapping(value = "/leave/{participantId}", consumes = "*/*")
+    public ResponseEntity<Void> leave(@PathVariable UUID participantId) {
+        log.info("LEAVE {}", participantId);
         roomSerivce.deleteParticipant(participantId);
+        return ResponseEntity.ok().build();
     }
 //    @EventListener
 //    public void onDisconnect(SessionDisconnectEvent e) {
