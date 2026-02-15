@@ -44,20 +44,20 @@ public class YandexService {
                 RequestBody.fromBytes(data)
         );
     }
-    @PostConstruct
-    public void uploadTestFile() {
-        try {
-            byte[] data = "Hello Yandex Object Storage!".getBytes();
-
-            uploadFile(
-                    "test/test-video.txt",
-                    data,
-                    "text/plain"
-            );
-
-           log.info(" Файл загружен на Yandex Object Storage!");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+//    @PostConstruct
+//    public void uploadTestFile() {
+//        try {
+//            byte[] data = "Hello Yandex Object Storage!".getBytes();
+//
+//            uploadFile(
+//                    "test/test-video.txt",
+//                    data,
+//                    "text/plain"
+//            );
+//
+//           log.info(" Файл загружен на Yandex Object Storage!");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 }

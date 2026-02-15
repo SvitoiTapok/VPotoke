@@ -21,7 +21,10 @@ root.render(
                     Main
                 </NavLink>
             <Routes>
-                <Route path="/room" element={<RoomMain roomId="ebd009f1-ad4b-4709-a8e0-d9482edc0628"/>}/>
+                <Route path="/" element={<App />}/>
+                <Route path="/room/:roomId" element={<RoomMain/>}/>
+                <Route path="/invite/:inviteLink" element={<RoomMain/>}/>
+                {/*<Route path="/room" element={<RoomMain roomId="ebd009f1-ad4b-4709-a8e0-d9482edc0628"/>}/>*/}
             </Routes>
             </nav>
         </BrowserRouter>
@@ -29,7 +32,4 @@ root.render(
     </WebSocketProvider>
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();

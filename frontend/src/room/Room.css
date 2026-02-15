@@ -66,6 +66,7 @@
 .sender button {
     max-width: 20%;
     background: #ff8c00;
+.chat-area input {
     margin: 8px;
     padding: 8px;
     border: none;
