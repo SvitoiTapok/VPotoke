@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface VideoRepository extends JpaRepository<Video, String> {
     List<Video> findByExpiresAtBefore(LocalDateTime now);
+    List<Video> findByUploadedAtAfter(LocalDateTime cutoff);
 }

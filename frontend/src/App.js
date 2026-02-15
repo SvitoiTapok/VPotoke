@@ -1,10 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Auth from './Auth';
-import VideoUpload from './components/VideoUpload.jsx';
+import CreateRoom from './CreateRoom';
 
 function App() {
   const [user, setUser] = useState(null);
   const [showAuth, setShowAuth] = useState(false);
+  const [showCreateRoom, setShowCreateRoom] = useState(false);
+  const navigate = useNavigate();
+
+  // Проверяем сессию при загрузке
+  useEffect(() => {
+    checkSession();
+  }, []);
+
+  const checkSession = async () => {
+    try {
+      console.log('Checking session...');
+      const response = await fetch('http://localhost:8080/api/auth/me', {
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+        }
+      });
+
+      console.log('Session check response status:', response.status);
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Session data:', data);
+        setUser(data);
+      } else {
+        console.log('Not authenticated');
+        setUser(null);
+      }
+    } catch (err) {
+      console.error('Session check failed:', err);
+      setUser(null);
+    }
+  };
 
   const handleLogin = (userData) => {
     setUser(userData);
@@ -12,12 +46,22 @@ function App() {
     console.log('User logged in:', userData);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await fetch('http://localhost:8080/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+    } catch (err) {
+      console.error('Logout error:', err);
+    }
     setUser(null);
   };
 
-  const handleUploadSuccess = (data) => {
-    console.log('Upload successful:', data);
+  const handleRoomCreated = (room) => {
+    setShowCreateRoom(false);
+    // Переходим в созданную комнату
+    navigate(`/room/${room.id}`);
   };
 
   return (
@@ -40,45 +84,40 @@ function App() {
             <h1 style={{
               color: '#F97316',
               margin: 0,
-              fontSize: '28px'
-            }}>
+              fontSize: '28px',
+              cursor: 'pointer'
+            }} onClick={() => navigate('/')}>
               VPotoke
             </h1>
 
-            {/* Навигация */}
             <nav style={{ display: 'flex', gap: '15px' }}>
-              <button style={{
-                padding: '8px 16px',
-                backgroundColor: 'transparent',
-                border: 'none',
-                color: '#1E293B',
-                cursor: 'pointer',
-                fontWeight: 'bold'
-              }}>
+              <button
+                  onClick={() => navigate('/')}
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: '#1E293B',
+                    cursor: 'pointer',
+                    fontWeight: 'bold'
+                  }}
+              >
                 Главная
               </button>
-              <button style={{
-                padding: '8px 16px',
-                backgroundColor: 'transparent',
-                border: 'none',
-                color: '#1E293B',
-                cursor: 'pointer'
-              }}>
+              <button
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: '#1E293B',
+                    cursor: 'pointer'
+                  }}
+              >
                 FAQ
-              </button>
-              <button style={{
-                padding: '8px 16px',
-                backgroundColor: 'transparent',
-                border: 'none',
-                color: '#1E293B',
-                cursor: 'pointer'
-              }}>
-                Контакты
               </button>
             </nav>
           </div>
 
-          {/* Кнопки авторизации */}
           <div>
             {user ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -159,15 +198,46 @@ function App() {
             </div>
         )}
 
+        {/* Модальное окно создания комнаты */}
+        {showCreateRoom && user && (
+            <div style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              zIndex: 1000,
+              overflow: 'auto'
+            }}>
+              <div style={{
+                backgroundColor: 'white',
+                padding: '20px',
+                borderRadius: '8px',
+                maxWidth: '700px',
+                width: '95%',
+                maxHeight: '90vh',
+                overflow: 'auto'
+              }}>
+                <CreateRoom
+                    user={user}
+                    onRoomCreated={handleRoomCreated}
+                    onCancel={() => setShowCreateRoom(false)}
+                />
+              </div>
+            </div>
+        )}
+
         {/* Основной контент */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: '2fr 1fr',
           gap: '30px'
         }}>
-          {/* Левая колонка - основной контент */}
           <div>
-            {/* Блок с видео */}
             <div style={{
               backgroundColor: '#1E293B',
               color: 'white',
@@ -184,48 +254,65 @@ function App() {
               </p>
             </div>
 
-            {/* Кнопка создания комнаты */}
             <div style={{
-              padding: '20px',
+              padding: '30px',
               border: '1px solid #e0e0e0',
               borderRadius: '8px',
-              backgroundColor: user ? '#f8fff8' : '#f5f5f5'
+              backgroundColor: user ? '#f8fff8' : '#f5f5f5',
+              textAlign: 'center'
             }}>
-              <h3 style={{ marginTop: 0, color: '#1E293B' }}>
-                Создать комнату для просмотра
-              </h3>
               {user ? (
                   <>
-                    <p style={{ color: '#666', marginBottom: '20px' }}>
+                    <h3 style={{ marginTop: 0, color: '#1E293B' }}>
+                      Начните просмотр прямо сейчас!
+                    </h3>
+                    <p style={{ color: '#666', marginBottom: '25px' }}>
                       Загрузите видео и пригласите друзей
                     </p>
-                    <VideoUpload onUploadSuccess={handleUploadSuccess} />
+                    <button
+                        onClick={() => setShowCreateRoom(true)}
+                        style={{
+                          padding: '15px 40px',
+                          backgroundColor: '#F97316',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          fontSize: '18px',
+                          fontWeight: 'bold',
+                          cursor: 'pointer'
+                        }}
+                    >
+                      Создать комнату
+                    </button>
                   </>
               ) : (
-                  <div style={{ textAlign: 'center', padding: '20px' }}>
-                    <p style={{ color: '#666', marginBottom: '20px' }}>
+                  <>
+                    <h3 style={{ marginTop: 0, color: '#1E293B' }}>
+                      Хотите создать свою комнату?
+                    </h3>
+                    <p style={{ color: '#666', marginBottom: '25px' }}>
                       🔒 Требуется авторизация для создания комнаты
                     </p>
                     <button
                         onClick={() => setShowAuth(true)}
                         style={{
-                          padding: '12px 24px',
+                          padding: '12px 30px',
                           backgroundColor: '#F97316',
                           color: 'white',
                           border: 'none',
                           borderRadius: '4px',
-                          cursor: 'pointer',
-                          fontWeight: 'bold'
+                          fontSize: '16px',
+                          fontWeight: 'bold',
+                          cursor: 'pointer'
                         }}
                     >
                       Войти или зарегистрироваться
                     </button>
-                  </div>
+                  </>
               )}
             </div>
           </div>
 
-          {/* Правая колонка - FAQ и информация */}
           <div>
             <div style={{
               backgroundColor: '#f5f5f5',
@@ -275,7 +362,6 @@ function App() {
               </div>
             </div>
 
-            {/* Дополнительная информация */}
             <div style={{
               marginTop: '20px',
               padding: '15px',

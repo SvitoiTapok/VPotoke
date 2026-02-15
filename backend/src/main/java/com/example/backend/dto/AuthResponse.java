@@ -10,4 +10,5 @@ public class AuthResponse {
     private String message;
     private String userId;
     private String login;
+    // Добавляем поле для sessionId, если нужно
 }

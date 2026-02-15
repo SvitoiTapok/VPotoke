@@ -34,13 +34,22 @@ function Auth({ onLogin, onClose }) {
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',  // Важно! Отправляем куки
                 body: JSON.stringify({ login, password })
             });
 
             const data = await response.json();
+            console.log('Auth response:', data);  // Добавим отладку
 
             if (data.success) {
                 if (isLogin && onLogin) {
+                    // После успешного логина, проверим сессию
+                    const sessionCheck = await fetch(`${API_URL}/api/auth/me`, {
+                        credentials: 'include'
+                    });
+                    const sessionData = await sessionCheck.json();
+                    console.log('Session check:', sessionData);
+
                     onLogin(data);
                 } else {
                     setMessage('✅ Регистрация успешна! Теперь можете войти');

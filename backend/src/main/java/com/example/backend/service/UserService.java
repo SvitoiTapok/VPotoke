@@ -51,7 +51,6 @@ public class UserService {
     }
 
     public AuthResponse login(String login, String password) {
-        // Проверка на пустые значения
         if (login == null || login.trim().isEmpty()) {
             return new AuthResponse(false, "Login cannot be empty", null, null);
         }
@@ -59,7 +58,6 @@ public class UserService {
             return new AuthResponse(false, "Password cannot be empty", null, null);
         }
 
-        // Поиск пользователя
         var userOptional = userRepository.findByLogin(login);
 
         if (userOptional.isEmpty()) {
@@ -68,7 +66,6 @@ public class UserService {
 
         User user = userOptional.get();
 
-        // Проверка пароля
         String hashedInputPassword = hashPassword(password);
         if (!user.getPassword().equals(hashedInputPassword)) {
             return new AuthResponse(false, "Invalid password", null, null);
