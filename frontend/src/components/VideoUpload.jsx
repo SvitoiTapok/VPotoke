@@ -5,11 +5,11 @@ function VideoUpload({ onUploadSuccess }) {
     const [uploading, setUploading] = useState(false);
     const [progress, setProgress] = useState(0);
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
 
     const handleFileSelect = (e) => {
         const selectedFile = e.target.files[0];
         if (selectedFile) {
-            // Проверка размера (5GB)
             if (selectedFile.size > 5 * 1024 * 1024 * 1024) {
                 setError('File too large. Maximum size is 5GB');
                 return;
@@ -17,6 +17,7 @@ function VideoUpload({ onUploadSuccess }) {
 
             setFile(selectedFile);
             setError('');
+            setSuccess('');
         }
     };
 
@@ -25,34 +26,28 @@ function VideoUpload({ onUploadSuccess }) {
 
         setUploading(true);
         setError('');
+        setSuccess('');
         setProgress(0);
 
         const formData = new FormData();
         formData.append('file', file);
 
         try {
-            // Важно: используем полный URL бэкенда
-            const API_URL = 'http://localhost:8080'; // или 'http://backend:8080' если из контейнера
-
-            console.log('Uploading to:', `${API_URL}/api/video/upload`);
+            const API_URL = 'http://localhost:8080';
 
             const response = await fetch(`${API_URL}/api/video/upload`, {
                 method: 'POST',
                 body: formData,
-                // НЕ добавляем Content-Type - браузер сам установит с boundary
             });
 
-            console.log('Response status:', response.status);
-
             const data = await response.json();
-            console.log('Response data:', data);
 
             if (response.ok && data.success) {
                 setProgress(100);
+                setSuccess(`✅ Video uploaded successfully!`);
                 if (onUploadSuccess) {
                     onUploadSuccess(data);
                 }
-                alert('Video uploaded successfully!');
                 setFile(null);
                 document.getElementById('video-upload').value = '';
             } else {
@@ -60,25 +55,14 @@ function VideoUpload({ onUploadSuccess }) {
             }
         } catch (err) {
             console.error('Upload error:', err);
-            setError(`Network error: ${err.message}. Make sure backend is running on port 8080`);
+            setError(`❌ ${err.message}`);
         } finally {
             setUploading(false);
         }
     };
 
     return (
-        <div style={{
-            padding: '20px',
-            maxWidth: '600px',
-            margin: '0 auto',
-            backgroundColor: '#1E293B',
-            borderRadius: '8px',
-            color: 'white'
-        }}>
-            <h2 style={{ marginBottom: '20px', color: '#F97316' }}>
-                VPotoke Upload Test
-            </h2>
-
+        <div>
             <div style={{ marginBottom: '15px' }}>
                 <input
                     id="video-upload"
@@ -89,17 +73,21 @@ function VideoUpload({ onUploadSuccess }) {
                     style={{
                         width: '100%',
                         padding: '10px',
-                        backgroundColor: '#2D3A4B',
-                        color: 'white',
-                        border: '1px solid #F97316',
-                        borderRadius: '4px'
+                        border: '1px dashed #4CAF50',
+                        borderRadius: '4px',
+                        backgroundColor: '#fff'
                     }}
                 />
             </div>
 
             {file && (
-                <div style={{ marginBottom: '15px' }}>
-                    <p><strong>File:</strong> {file.name}</p>
+                <div style={{
+                    marginBottom: '15px',
+                    padding: '10px',
+                    backgroundColor: '#f5f5f5',
+                    borderRadius: '4px'
+                }}>
+                    <p><strong>Selected file:</strong> {file.name}</p>
                     <p><strong>Size:</strong> {(file.size / (1024 * 1024)).toFixed(2)} MB</p>
                 </div>
             )}
@@ -108,12 +96,46 @@ function VideoUpload({ onUploadSuccess }) {
                 <div style={{
                     marginBottom: '15px',
                     padding: '10px',
-                    backgroundColor: 'rgba(220, 38, 38, 0.2)',
-                    border: '1px solid #DC2626',
+                    backgroundColor: '#fff3f3',
+                    border: '1px solid #ffcdd2',
                     borderRadius: '4px',
-                    color: '#FCA5A5'
+                    color: '#c62828'
                 }}>
-                    ❌ {error}
+                    {error}
+                </div>
+            )}
+
+            {success && (
+                <div style={{
+                    marginBottom: '15px',
+                    padding: '10px',
+                    backgroundColor: '#e8f5e8',
+                    border: '1px solid #a5d6a7',
+                    borderRadius: '4px',
+                    color: '#2e7d32'
+                }}>
+                    {success}
+                </div>
+            )}
+
+            {uploading && (
+                <div style={{ marginBottom: '15px' }}>
+                    <div style={{
+                        height: '20px',
+                        backgroundColor: '#f0f0f0',
+                        borderRadius: '10px',
+                        overflow: 'hidden'
+                    }}>
+                        <div style={{
+                            width: '100%',
+                            height: '100%',
+                            backgroundColor: '#4CAF50',
+                            animation: 'progress 2s infinite'
+                        }} />
+                    </div>
+                    <p style={{ textAlign: 'center', marginTop: '5px' }}>
+                        Processing video... This may take a few minutes
+                    </p>
                 </div>
             )}
 
@@ -123,7 +145,7 @@ function VideoUpload({ onUploadSuccess }) {
                 style={{
                     width: '100%',
                     padding: '12px',
-                    backgroundColor: !file || uploading ? '#4B5563' : '#F97316',
+                    backgroundColor: !file || uploading ? '#ccc' : '#4CAF50',
                     color: 'white',
                     border: 'none',
                     borderRadius: '4px',
@@ -132,8 +154,16 @@ function VideoUpload({ onUploadSuccess }) {
                     cursor: !file || uploading ? 'not-allowed' : 'pointer'
                 }}
             >
-                {uploading ? 'Processing...' : 'Upload'}
+                {uploading ? 'Processing...' : 'Upload Video'}
             </button>
+
+            <style>{`
+                @keyframes progress {
+                    0% { width: 0%; }
+                    50% { width: 70%; }
+                    100% { width: 100%; }
+                }
+            `}</style>
         </div>
     );
 }
