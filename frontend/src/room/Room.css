@@ -145,6 +145,48 @@
 .participant:hover {
     background-color: rgba(255, 165, 0, 0.1); /* легкий оранжевый hover */
 }
+.participant {
+    position: relative;
+    cursor: pointer;
+}
+
+.participant-menu {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: #1f1f1f;
+    border-radius: 8px;
+    padding: 8px;
+    min-width: 180px;
+    z-index: 20;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.participant-menu button {
+    background: #2e2e2e;
+    border: none;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: left;
+}
+
+.participant-menu button:hover {
+    background: #444;
+}
+
+.participant-menu .admin-btn {
+    background: #8b1e1e;
+}
+
+.participant-menu .admin-btn:hover {
+    background: #b22c2c;
+}
+
 
 .avatar {
     width: 32px;

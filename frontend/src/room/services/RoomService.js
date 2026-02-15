@@ -87,8 +87,13 @@ const roomService = {
     },
     sendSyncOffRequest: async (roomId, userId) => {
         return await fetch(`${API_BASE_URL}/OffSyncMode?roomId=${roomId}&userId=${userId}`)
+    },
+    togglePermission: async (userId,adminId, type, roomId) => {
+        return await fetch(`${API_BASE_URL}/togglePermission?userId=${userId}&adminId=${adminId}&type=${type}&roomId${roomId}`)
+    },
+    makeAdmin: async (userId, adminId, roomId) => {
+        return await fetch(`${API_BASE_URL}/togglePermission?userId=${userId}&adminId=${adminId}&roomId${roomId}`)
     }
-
 
 };
 

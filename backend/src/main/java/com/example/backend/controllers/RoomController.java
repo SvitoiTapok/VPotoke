@@ -32,10 +32,7 @@ public class RoomController {
     public ResponseEntity<UUID> newParticipant(@RequestParam UUID roomId, @RequestParam String sessionId) {
         try {
             UUID id = roomService.newParticipant(roomId, sessionId);
-            messagingTemplate.convertAndSend(
-                    "/topic/room/" + roomId + "/participants",
-                    roomService.getAllParticipants(roomId)
-            );
+            updateParticipantsReq(roomId);
             return ResponseEntity.ok().body(id);
         } catch (NoSuchElementException e) {
             return ResponseEntity.notFound().build();
@@ -50,10 +47,7 @@ public class RoomController {
     public ResponseEntity<UUID> newParticipantWithName(@RequestParam UUID roomId, @RequestParam String name, @RequestParam String sessionId) {
         try {
             UUID id = roomService.newParticipantWithName(roomId, name, sessionId);
-            messagingTemplate.convertAndSend(
-                    "/topic/room/" + roomId + "/participants",
-                    roomService.getAllParticipants(roomId)
-            );
+            updateParticipantsReq(roomId);
             return ResponseEntity.ok().body(id);
         } catch (NoSuchElementException e) {
             return ResponseEntity.notFound().build();
@@ -77,20 +71,15 @@ public class RoomController {
     public void updateParticipants(
             @DestinationVariable UUID roomId
     ) {
-        messagingTemplate.convertAndSend(
-                "/topic/room/" + roomId + "/participants",
-                roomService.getAllParticipants(roomId)
-        );
+        updateParticipantsReq(roomId);
     }
 
     @GetMapping("/updateName")
     public ResponseEntity<?> updateName(@RequestParam UUID authorId, @RequestParam String name) {
         UUID id = roomService.getParticipant(authorId).getRoom().getId();
         roomService.updateName(authorId, name);
-        messagingTemplate.convertAndSend(
-                "/topic/room/" + id + "/participants",
-                roomService.getAllParticipants(id)
-        );
+        updateParticipantsReq(id);
+//
         return ResponseEntity.ok().build();
     }
     @GetMapping("/OnSyncMode")
@@ -164,12 +153,16 @@ public class RoomController {
 
         );
     }
+    private void updateParticipantsReq(UUID roomId){
+        messagingTemplate.convertAndSend(
+                "/topic/room/" + roomId + "/participants",
+                roomService.getAllParticipants(roomId)
+        );
+    }
     @PostMapping("/create")
     public ResponseEntity<?> createRoom(@RequestBody com.example.backend.dto.CreateRoomRequest request, HttpSession session) {
-        // Добавим отладку
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
-            // Проверим, может быть userId в другом месте
             log.warn("No userId in session. Available attributes:");
             java.util.Enumeration<String> attributeNames = session.getAttributeNames();
             while (attributeNames.hasMoreElements()) {
@@ -215,6 +208,24 @@ public class RoomController {
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
+    }
+    @GetMapping("/togglePermission")
+    public ResponseEntity<?> togglePermission(@RequestParam UUID roomId, @RequestParam UUID userId, @RequestParam UUID adminId, @RequestParam String type) {
+        if(roomService.togglePermission(userId, adminId, type)){
+            return ResponseEntity.ok().build();
+        }
+        updateParticipantsReq(roomId);
+        return ResponseEntity.badRequest().build();
+
+    }
+    @GetMapping("/makeAdmin")
+    public ResponseEntity<?> makeAdmin(@RequestParam UUID roomId, @RequestParam UUID userId, @RequestParam UUID adminId) {
+        if(roomService.makeAdmin(userId, adminId)){
+            return ResponseEntity.ok().build();
+        }
+        updateParticipantsReq(roomId);
+        return ResponseEntity.badRequest().build();
+
     }
 
 //    @PostMapping("/{roomId}/join")

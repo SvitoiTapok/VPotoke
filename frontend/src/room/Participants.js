@@ -8,11 +8,12 @@ const Participants = (props) => {
     const [avatar, setAvatar] = useState(null);
     const [name, setName] = useState("")
     const [editing, setEditing] = useState(false);
+    const [selected, setSelected] = useState(null); // id участника с открытым меню
 
 
     useEffect(() => {
         const sub = subscribe(`/topic/room/${props.roomId}/participants`, (msg) => {
-            if(props.prid) {
+            if (props.prid) {
                 const chat = JSON.parse(msg.body);
                 const avatar = chat.find(p => p.id === props.prid);
                 const others = chat.filter(p => p.id !== props.prid);
@@ -41,6 +42,13 @@ const Participants = (props) => {
         })
 
     };
+    const togglePermission = (userId, type) => {
+        roomService.togglePermission(userId, props.prid, type)
+    };
+
+    const makeAdmin = (userId) => {
+        roomService.makeAdmin(userId, props.prid)
+    };
 
     return (
         <aside className="participants">
@@ -68,12 +76,36 @@ const Participants = (props) => {
             <h2>Остальные участники</h2>
             <ul className="participants-list">
                 {participants.map((part) => (
-                    <li key={part.id} className="participant">
+                    <li
+                        key={part.id}
+                        className="participant"
+                        onClick={() =>
+                            setSelected(selected === part.id ? null : part.id)
+                        }
+                    >
                         <span className="avatar" style={{backgroundColor: part.color}}/>
                         <span className="name">{part.name}</span>
+
+                        {selected === part.id && (
+                            <div className="participant-menu">
+                                <button onClick={() => togglePermission(part.id, "PLAYER")}>
+                                    🎬 Управление плеером
+                                </button>
+                                <button onClick={() => togglePermission(part.id, "CHAT")}>
+                                    💬 Право писать в чат
+                                </button>
+                                <button
+                                    className="admin-btn"
+                                    onClick={() => makeAdmin(part.id)}
+                                >
+                                    ⭐ Сделать админом
+                                </button>
+                            </div>
+                        )}
                     </li>
                 ))}
             </ul>
+
         </aside>
     );
 

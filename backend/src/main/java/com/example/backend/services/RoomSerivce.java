@@ -220,5 +220,34 @@ public com.example.backend.dto.RoomResponse createRoom(String userId, com.exampl
                 .collect(Collectors.toList());
     }
 
+    public boolean togglePermission(UUID authorId, UUID adminId, String type){
+        Participant p = participantRepository.findById(adminId).orElseThrow(NoSuchElementException::new);
+        if(p.getAdmin()){
+            Participant p1 = participantRepository.findById(authorId).orElseThrow(NoSuchElementException::new);
+            if(Objects.equals(type, "PLAYER")){
+                p1.setPlayer_rights(!p1.getPlayer_rights());
+            }else {
+                p1.setPlayer_rights(!p1.getMessage_rights());
+            }
+            participantRepository.save(p1);
+            return true;
+        }else {
+            return false;
+        }
+
+    }
+    public boolean makeAdmin(UUID authorId, UUID adminId){
+        Participant p = participantRepository.findById(adminId).orElseThrow(NoSuchElementException::new);
+        if(p.getAdmin()){
+            Participant p1 = participantRepository.findById(authorId).orElseThrow(NoSuchElementException::new);
+            p1.setAdmin(true);
+            participantRepository.save(p1);
+            return true;
+        }else {
+            return false;
+        }
+
+    }
+
 
 }
