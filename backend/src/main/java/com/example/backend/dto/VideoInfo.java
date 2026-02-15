@@ -1,6 +1,6 @@
 package com.example.backend.dto;
 
-import com.example.backend.entity.Video;
+import com.example.backend.entities.Video;
 import lombok.Data;
 import java.time.LocalDateTime;
 

@@ -1,6 +1,6 @@
-package com.example.backend.repository;
+package com.example.backend.repositories;
 
-import com.example.backend.entity.Video;
+import com.example.backend.entities.Video;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.time.LocalDateTime;
 import java.util.List;

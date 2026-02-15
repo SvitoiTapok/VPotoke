@@ -1,8 +1,8 @@
-package com.example.backend.service;
+package com.example.backend.services;
 
 import com.example.backend.dto.AuthResponse;
-import com.example.backend.entity.User;
-import com.example.backend.repository.UserRepository;
+import com.example.backend.entities.User;
+import com.example.backend.repositories.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -43,7 +43,7 @@ public class UserService {
         try {
             user = userRepository.save(user);
             log.info("New user registered: {}", login);
-            return new AuthResponse(true, "Registration successful", user.getId(), user.getLogin());
+            return new AuthResponse(true, "Registration successful", user.getId().toString(), user.getLogin());
         } catch (Exception e) {
             log.error("Error registering user", e);
             return new AuthResponse(false, "Registration failed: " + e.getMessage(), null, null);
@@ -72,7 +72,7 @@ public class UserService {
         }
 
         log.info("User logged in: {}", login);
-        return new AuthResponse(true, "Login successful", user.getId(), user.getLogin());
+        return new AuthResponse(true, "Login successful", user.getId().toString(), user.getLogin());
     }
 
     private String hashPassword(String password) {

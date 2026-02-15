@@ -1,17 +1,19 @@
 package com.example.backend.dto;
 
-import com.example.backend.entity.Room;
+import com.example.backend.entities.Room;
 import lombok.Data;
+
+import java.util.UUID;
 
 @Data
 public class RoomResponse {
-    private String id;
+    private UUID id;
     private String name;
     private String description;
     private String videoId;
     private String videoUrl;
     private String videoName;
-    private String moderatorId;
+    private UUID moderatorId;
     private String moderatorLogin;
     private String inviteLink;
     private int participantsCount;
@@ -33,9 +35,9 @@ public class RoomResponse {
         }
 
         response.setVideoName(room.getVideo().getOriginalFileName());
-        response.setModeratorId(room.getModerator().getId());
-        response.setModeratorLogin(room.getModerator().getLogin());
-        response.setInviteLink(room.getInviteLink());
+        response.setModeratorId(room.getCreator().getId());
+        response.setModeratorLogin(room.getCreator().getLogin());
+        response.setInviteLink(room.getLink());
         response.setParticipantsCount(room.getParticipants().size());
         return response;
     }

@@ -1,9 +1,9 @@
-package com.example.backend.controller;
+package com.example.backend.controllers;
 
 import com.example.backend.dto.VideoUploadResponse;
-import com.example.backend.entity.Video;
-import com.example.backend.repository.VideoRepository;
-import com.example.backend.service.VideoConversionService;
+import com.example.backend.entities.Video;
+import com.example.backend.repositories.VideoRepository;
+import com.example.backend.services.VideoConversionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

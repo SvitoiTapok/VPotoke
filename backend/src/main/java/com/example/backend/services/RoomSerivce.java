@@ -4,14 +4,8 @@ import com.example.backend.DTO.ChatMessageInputDTO;
 import com.example.backend.DTO.ChatMessageOutputDTO;
 import com.example.backend.DTO.ParticipantDTO;
 import com.example.backend.DTO.PlayerPosOutputDTO;
-import com.example.backend.entities.ChatMessage;
-import com.example.backend.entities.Participant;
-import com.example.backend.entities.PlayerPos;
-import com.example.backend.entities.Room;
-import com.example.backend.repositories.MessageRepository;
-import com.example.backend.repositories.ParticipantRepository;
-import com.example.backend.repositories.PlayerPosRepository;
-import com.example.backend.repositories.RoomRepository;
+import com.example.backend.entities.*;
+import com.example.backend.repositories.*;
 import com.example.backend.util.ColorUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,8 +15,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -32,6 +28,8 @@ public class RoomSerivce {
     private final ParticipantRepository participantRepository;
     private final RoomRepository roomRepository;
     private final PlayerPosRepository playerPosRepository;
+    private final UserRepository userRepository;
+    private final VideoRepository videoRepository;
 
 
 
@@ -148,9 +146,81 @@ public class RoomSerivce {
     public boolean getSync(UUID roomId){
         return roomRepository.findById(roomId).orElseThrow(NoSuchElementException::new).getIsSync();
     }
-//    public void deleteParticipant(String sessionId){
-//        Participant p = participantRepository.findBySessionId(sessionId).orElseThrow(NoSuchElementException::new);
-//        participantRepository.delete(p);
-//        log.info("Deleted participant " + sessionId);
+//==================================================================================================================
+@Transactional
+public com.example.backend.dto.RoomResponse createRoom(String userId, com.example.backend.dto.CreateRoomRequest request) {
+    User moderator = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+    Video video = videoRepository.findById(request.getVideoId())
+            .orElseThrow(() -> new RuntimeException("Video not found"));
+
+    // Проверяем, что видео принадлежит пользователю
+    // Временное решение - пропускаем проверку
+
+    Room room = new Room();
+    room.setName(request.getName());
+    room.setDescription(request.getDescription());
+    room.setVideo(video);
+    room.setCreator(moderator);
+
+    room = roomRepository.save(room);
+
+//    RoomParticipant participant = new RoomParticipant();
+//    participant.setRoom(room);
+//    participant.setUser(moderator);
+//    participant.setNickname(moderator.getLogin());
+//    participant.setCanControl(true);
+//    participant.setCanChat(true);
+//    participantRepository.save(participant);
+
+
+    return com.example.backend.dto.RoomResponse.fromEntity(room);
+}
+    public com.example.backend.dto.RoomResponse getRoom(UUID roomId) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new RuntimeException("Room not found"));
+        return com.example.backend.dto.RoomResponse.fromEntity(room);
+    }
+
+    public com.example.backend.dto.RoomResponse getRoomByInviteLink(String inviteLink) {
+        Room room = roomRepository.findByLink(inviteLink)
+                .orElseThrow(() -> new RuntimeException("Room not found"));
+        return com.example.backend.dto.RoomResponse.fromEntity(room);
+    }
+
+//    @Transactional
+//    public void joinRoom(UUID roomId, String userId, String nickname) {
+//        Room room = roomRepository.findById(roomId)
+//                .orElseThrow(() -> new RuntimeException("Room not found"));
+//
+//        User user = userId != null ? userRepository.findById(userId).orElse(null) : null;
+//
+//        Participant participant = new Participant();
+//        participant.setRoom(room);
+//        participant.setNickname(nickname != null ? nickname :
+//                (user != null ? user.getLogin() : "Guest-" + System.currentTimeMillis() % 1000));
+//
+//        participantRepository.save(participant);
+//        log.info("User joined room: {}, nickname: {}", roomId, participant.getNickname());
 //    }
+
+//    @Transactional
+//    public void leaveRoom(String roomId, String userId) {
+//        // Находим участника по roomId и userId
+//        // И удаляем его
+//        log.info("Removing user {} from room {}", userId, roomId);
+//        // participantRepository.deleteByRoomIdAndUserId(roomId, userId);
+//    }
+
+    public List<com.example.backend.dto.VideoInfo> getUserVideos(String userId) {
+        // Временное решение - возвращаем все видео, загруженные за последние 6 часов
+        LocalDateTime sixHoursAgo = LocalDateTime.now().minusHours(6);
+        return videoRepository.findByUploadedAtAfter(sixHoursAgo)
+                .stream()
+                .map(com.example.backend.dto.VideoInfo::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+
 }

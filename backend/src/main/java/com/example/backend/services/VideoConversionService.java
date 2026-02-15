@@ -1,4 +1,4 @@
-package com.example.backend.service;
+package com.example.backend.services;
 
 import com.example.backend.s3api.YandexService;
 import lombok.extern.slf4j.Slf4j;

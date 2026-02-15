@@ -32,9 +32,19 @@ public class Room {
     private Boolean isSync;
 
     @ManyToOne
+    @JoinColumn(name = "video_id", nullable = false)
+    private Video video;
+    @ManyToOne
     @JoinColumn(name="user_id", nullable = false, referencedColumnName = "id")
     private User creator;
-
+    @PrePersist
+    protected void onCreate() {
+        // Генерируем уникальную ссылку-приглашение
+        link = generateInviteLink();
+    }
     @OneToMany(mappedBy = "room")
     private List<Participant> participants;
+    private String generateInviteLink() {
+        return "room-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+    }
 }

@@ -1,8 +1,8 @@
-package com.example.backend.controller;
+package com.example.backend.controllers;
 
 import com.example.backend.dto.AuthRequest;
 import com.example.backend.dto.AuthResponse;
-import com.example.backend.service.UserService;
+import com.example.backend.services.UserService;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
