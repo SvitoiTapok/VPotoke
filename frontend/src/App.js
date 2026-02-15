@@ -1,61 +1,55 @@
 import React, { useState } from 'react';
+import Auth from './Auth';
 
 function App() {
-  const [file, setFile] = useState(null);
-  const [uploading, setUploading] = useState(false);
-  const [message, setMessage] = useState('');
+  const [user, setUser] = useState(null);
 
-  const handleUpload = async () => {
-    if (!file) return;
+  const handleLogin = (userData) => {
+    setUser(userData);
+    console.log('User logged in:', userData);
+  };
 
-    setUploading(true);
-    setMessage('Uploading...');
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      const response = await fetch('http://localhost:8080/api/video/upload', {
-        method: 'POST',
-        body: formData
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage('✅ Success!');
-        console.log('Success:', data);
-      } else {
-        setMessage('❌ Error: ' + data.message);
-      }
-    } catch (err) {
-      setMessage('❌ Network error');
-      console.error(err);
-    } finally {
-      setUploading(false);
-    }
+  const handleLogout = () => {
+    setUser(null);
   };
 
   return (
       <div style={{ padding: '20px' }}>
-        <h1>VPotoke Upload Test</h1>
+        <h1>VPotoke</h1>
 
-        <input
-            type="file"
-            accept="video/*"
-            onChange={(e) => setFile(e.target.files[0])}
-            disabled={uploading}
-        />
+        {user ? (
+            <div>
+              <div style={{
+                padding: '10px',
+                backgroundColor: '#e8f5e8',
+                border: '1px solid #4CAF50',
+                borderRadius: '4px',
+                marginBottom: '20px'
+              }}>
+                <p><strong>Logged in as:</strong> {user.login}</p>
+                <p><strong>User ID:</strong> {user.userId}</p>
+                <button
+                    onClick={handleLogout}
+                    style={{
+                      padding: '5px 10px',
+                      backgroundColor: '#f44336',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                >
+                  Logout
+                </button>
+              </div>
 
-        <button
-            onClick={handleUpload}
-            disabled={!file || uploading}
-            style={{ marginLeft: '10px' }}
-        >
-          Upload
-        </button>
+              {/* Здесь будет остальной функционал приложения */}
+              <p>Welcome! You can now access protected features.</p>
 
-        {message && <p>{message}</p>}
+            </div>
+        ) : (
+            <Auth onLogin={handleLogin} />
+        )}
       </div>
   );
 }
