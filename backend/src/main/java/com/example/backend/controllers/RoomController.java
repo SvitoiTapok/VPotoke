@@ -1,6 +1,8 @@
 package com.example.backend.controllers;
 
 import com.example.backend.dto.*;
+import com.example.backend.entities.Participant;
+import com.example.backend.entities.Room;
 import com.example.backend.services.RoomSerivce;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,8 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -33,6 +37,8 @@ public class RoomController {
         try {
             UUID id = roomService.newParticipant(roomId, sessionId);
             updateParticipantsReq(roomId);
+            RoomResponse r = roomService.getRoom(roomId);
+            sendMessage("hello, " + roomService.getParticipant(id).getNickname()+ ", welcome to the room " + r.getName()+".\n For new Member, our room created with description: " + r.getDescription(), roomId);
             return ResponseEntity.ok().body(id);
         } catch (NoSuchElementException e) {
             return ResponseEntity.notFound().build();
@@ -263,9 +269,11 @@ public class RoomController {
 
     @DeleteMapping("/deleteParticipant/{userId}/{roomId}/{adminId}")
     public ResponseEntity<?> deleteParticipant(@PathVariable UUID userId, @PathVariable UUID roomId, @PathVariable UUID adminId) {
+        Participant p = roomService.getParticipant(userId);
         if(!roomService.deleteParticipant(userId, adminId)) return ResponseEntity.status(HttpStatusCode.valueOf(403)).build();
         updateParticipantsReq(roomId);
         notifyToExitOne(roomId, userId);
+        sendMessage("Participant " + p.getNickname() + " was deleted from room", roomId);
         return ResponseEntity.ok().build();
     }
     @DeleteMapping("/destroyRoom/{roomId}/{adminId}")
@@ -285,5 +293,12 @@ public class RoomController {
 //        return ResponseEntity.ok().build();
 //    }
 
-
+    public void sendMessage(String text, UUID roomId) {
+        ChatMessageOutputDTO mes = new ChatMessageOutputDTO(roomId, text, "ROOM", LocalDateTime.now().format(DateTimeFormatter.ISO_TIME));
+        log.info("Message sent to room {}: {}", roomId, mes);
+        messagingTemplate.convertAndSend(
+                "/topic/room/" + roomId + "/chat",
+                mes
+        );
+    }
 }

@@ -72,9 +72,11 @@ function App() {
     return (
         <div style={{
             padding: '20px',
-            maxWidth: '1200px',
+            maxWidth: '2000px',
+            height: '1200px',
             margin: '0 auto',
-            fontFamily: 'Arial, sans-serif'
+            fontFamily: 'Arial, sans-serif',
+            backgroundColor: '#1b263b'
         }}>
             {/* Шапка с навигацией */}
             <div style={{
@@ -224,7 +226,7 @@ function App() {
                         borderRadius: '8px',
                         maxWidth: '700px',
                         width: '95%',
-                        maxHeight: '90vh',
+                        maxHeight: '2000px',
                         overflow: 'auto'
                     }}>
                         <CreateRoom

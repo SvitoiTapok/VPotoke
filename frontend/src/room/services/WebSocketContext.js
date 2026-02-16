@@ -6,50 +6,56 @@ const WebSocketContext = createContext(null);
 
 export const WebSocketProvider = ({ children }) => {
     const clientRef = useRef(null);
-    const pendingSubs = useRef([]); // отложенные подписки до подключения
-    if (!clientRef.current) {
+    const subsRef = useRef(new Map()); // key = destination, value = callback
+
+    useEffect(() => {
         const client = new Client({
             webSocketFactory: () => new SockJS("http://localhost:8080/ws"),
             reconnectDelay: 3000,
-
         });
+
         client.onConnect = () => {
-            pendingSubs.current.forEach(({ destination, callback }) => {
-                client.subscribe(destination, callback);
-            });
-            pendingSubs.current = [];
             console.log("WS connected");
-        }
+            subsRef.current.forEach((cb, dest) => {
+                client.subscribe(dest, cb);
+            });
+        };
 
         client.activate();
         clientRef.current = client;
-    }
-    const subscribe = (destination, callback) => {
-        const client = clientRef.current;
-        if (!client) return null;
 
-        if (client.connected) {
-            return client.subscribe(destination, callback);
-        } else {
-            pendingSubs.current.push({ destination, callback });
-            return null;
+        return () => client.deactivate();
+    }, []);
+
+    const subscribe = (destination, callback) => {
+        subsRef.current.set(destination, callback);
+
+        const client = clientRef.current;
+        let sub = null;
+
+        if (client?.connected) {
+            sub = client.subscribe(destination, callback);
         }
+
+        return {
+            unsubscribe() {
+                subsRef.current.delete(destination);
+                sub?.unsubscribe();
+            }
+        };
     };
+
     const send = ({ destination, body, headers = {} }) => {
         const client = clientRef.current;
-        if (!client || !client.connected) {
-            console.log("WS not connected yet");
-            return;
-        }
+        if (!client?.connected) return;
         client.publish({ destination, body, headers });
     };
 
     return (
-        <WebSocketContext.Provider value={{ subscribe, send, client: clientRef.current }}>
+        <WebSocketContext.Provider value={{ subscribe, send }}>
             {children}
         </WebSocketContext.Provider>
     );
 };
 
-// Хук для использования WS в компонентах
 export const useWS = () => useContext(WebSocketContext);

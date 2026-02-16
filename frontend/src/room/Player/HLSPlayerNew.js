@@ -182,23 +182,28 @@ const toggle = () => {
     }
 };
 return (
+    <div>
+    <div className="video-area">
     <div data-vjs-player>
         <video
             ref={videoRef}
             className="video-js vjs-default-skin"
         />
-        {isHaveRights && (
-            <div>
-                <span>Синхронный режим:</span>
-                <button
-                    className={`toggle-btn ${active ? "on" : "off"}`}
-                    onClick={toggle}
-                >
-                    {active ? "ON" : "OFF"}
-                </button>
-            </div>)
-        }
 
+
+    </div>
+    </div>
+    {isHaveRights && (
+        <div className="sync-button">
+            <span>Синхронный режим:</span>
+            <button
+                className={`toggle-btn ${active ? "on" : "off"}`}
+                onClick={toggle}
+            >
+                {active ? "ON" : "OFF"}
+            </button>
+        </div>)
+    }
     </div>
 )
     ;

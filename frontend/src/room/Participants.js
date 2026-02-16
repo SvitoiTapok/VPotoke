@@ -5,58 +5,71 @@ import LeaveButton from "./LeaveButton";
 import {useNavigate} from "react-router-dom";
 
 const Participants = (props) => {
-    const navigate = useNavigate()
-    const {subscribe, send} = useWS();
+    const navigate = useNavigate();
+    const { subscribe, send } = useWS();
+
     const [participants, setParticipants] = useState([]);
     const [avatar, setAvatar] = useState(null);
-    const [name, setName] = useState("")
+    const [name, setName] = useState("");
     const [editing, setEditing] = useState(false);
-    const [selected, setSelected] = useState(null); // id участника с открытым меню
+    const [selected, setSelected] = useState(null);
 
+    const aliveRef = useRef(true);
 
     useEffect(() => {
+        aliveRef.current = true;
+
         const sub = subscribe(`/topic/room/${props.roomId}/participants`, (msg) => {
+            if (!aliveRef.current) return;
+
             if (props.prid) {
                 const chat = JSON.parse(msg.body);
-                const avatar = chat.find(p => p.id === props.prid);
-                console.log(avatar)
+                const me = chat.find(p => p.id === props.prid);
+
+                if (!me) {
+                    aliveRef.current = false;
+                    navigate("/sorryMessage");
+                    sub?.unsubscribe();
+
+                    return;
+                }
+
                 const others = chat.filter(p => p.id !== props.prid);
-                console.log(avatar)
-                if(avatar===undefined) roomService.createParticipant(props.roomId)
-                setAvatar(avatar);
+                setAvatar(me);
                 setParticipants(others);
             }
         });
-        let inter = setTimeout(() => {
-            send({
-                destination: `/app/part.upd/${props.roomId}`
-            })
-        }, 300)
+
+        const inter = setTimeout(() => {
+            send({ destination: `/app/part.upd/${props.roomId}` });
+        }, 300);
 
         return () => {
+            aliveRef.current = false;
             sub?.unsubscribe();
-            clearTimeout(inter)
+            clearTimeout(inter);
         };
-    }, [subscribe, props.prid, props.roomId]);
+    }, [subscribe, props.prid, props.roomId, navigate]);
 
     const handleSaveName = () => {
         if (!name.trim()) return;
 
-        roomService.updateName(props.prid, name).then(r => {
-            setAvatar({...avatar, name: name});
+        roomService.updateName(props.prid, name).then(() => {
+            setAvatar(prev => ({ ...prev, name }));
             setEditing(false);
-        })
-
+        });
     };
+
     const togglePermission = (userId, type) => {
-        roomService.togglePermission(userId, props.prid, type, props.roomId)
+        roomService.togglePermission(userId, props.prid, type, props.roomId);
     };
 
     const makeAdmin = (userId) => {
-        roomService.makeAdmin(userId, props.prid, props.roomId)
+        roomService.makeAdmin(userId, props.prid, props.roomId);
     };
+
     const deleteParticipant = (userId) => {
-        roomService.deleteParticipant(userId, props.roomId, props.prid)
+        roomService.deleteParticipant(userId, props.roomId, props.prid);
     };
 
     return (
@@ -64,7 +77,7 @@ const Participants = (props) => {
             <h2>Вы</h2>
             {avatar && (
                 <li key={avatar.id} className="participant" onClick={() => setEditing(true)}>
-                    <span className="avatar" style={{backgroundColor: avatar.color}}/>
+                    <span className="avatar" style={{ backgroundColor: avatar.color }} />
                     {editing ? (
                         <div className="edit-name">
                             <input
@@ -88,14 +101,12 @@ const Participants = (props) => {
                     <li
                         key={part.id}
                         className="participant"
-                        onClick={() =>
-                            setSelected(selected === part.id ? null : part.id)
-                        }
+                        onClick={() => setSelected(selected === part.id ? null : part.id)}
                     >
-                        <span className="avatar" style={{backgroundColor: part.color}}/>
+                        <span className="avatar" style={{ backgroundColor: part.color }} />
                         <span className="name">{part.name}</span>
 
-                        {selected === part.id && avatar.adminRights && !part.adminRights && (
+                        {selected === part.id && avatar?.adminRights && !part.adminRights && (
                             <div className="participant-menu">
                                 <button onClick={() => togglePermission(part.id, "PLAYER")}>
                                     Управление плеером
@@ -117,11 +128,14 @@ const Participants = (props) => {
                     </li>
                 ))}
             </ul>
-            <LeaveButton admin={avatar?.adminRights} roomId={props.roomId} prid={props.prid}/>
 
+            <LeaveButton
+                admin={avatar?.adminRights}
+                roomId={props.roomId}
+                prid={props.prid}
+            />
         </aside>
-
     );
+};
 
-}
 export default Participants;

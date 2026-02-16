@@ -9,6 +9,7 @@ import com.example.backend.repositories.*;
 import com.example.backend.util.ColorUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,7 @@ public class RoomSerivce {
     private final PlayerPosRepository playerPosRepository;
     private final UserRepository userRepository;
     private final VideoRepository videoRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
 
 
@@ -123,6 +125,7 @@ public class RoomSerivce {
             if(!l.contains(participant.getId())){
                 log.info("deleting participant {}", participant.getId());
                 participantRepository.deleteById(participant.getId());
+                sendMessage("Participant " + participant.getNickname() + " was deleted from room", roomId);
                 return null;
             }
             return new ParticipantDTO(participant.getNickname(), participant.getColor(), participant.getId().toString(), participant.getPlayer_rights(), participant.getMessage_rights(), participant.getAdmin());
@@ -271,6 +274,13 @@ public com.example.backend.dto.RoomResponse createRoom(UUID userId, com.example.
         Room r = roomRepository.findById(roomId).orElseThrow(NoSuchElementException::new);
         return r.getVideo().getFilename();
     }
-
+    public void sendMessage(String text, UUID roomId) {
+        ChatMessageOutputDTO mes = new ChatMessageOutputDTO(roomId, text, "ROOM", LocalDateTime.now().format(DateTimeFormatter.ISO_TIME));
+        log.info("Message sent to room {}: {}", roomId, mes);
+        messagingTemplate.convertAndSend(
+                "/topic/room/" + roomId + "/chat",
+                mes
+        );
+    }
 
 }

@@ -165,9 +165,8 @@ const RoomMain = (props) => {
 
 
             <main className="main-area">
-                <div className="video-area">
+
                     <HlsPlayerNew prid={prid} roomId={roomId}/>
-                </div>
                 <div className="chat-area">
                     <TextChat prid={prid} roomId={roomId}/>
                 </div>
