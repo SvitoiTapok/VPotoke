@@ -43,7 +43,7 @@ public class UserService {
         try {
             user = userRepository.save(user);
             log.info("New user registered: {}", login);
-            return new AuthResponse(true, "Registration successful", user.getId().toString(), user.getLogin());
+            return new AuthResponse(true, "Registration successful", user.getId(), user.getLogin());
         } catch (Exception e) {
             log.error("Error registering user", e);
             return new AuthResponse(false, "Registration failed: " + e.getMessage(), null, null);
@@ -72,7 +72,7 @@ public class UserService {
         }
 
         log.info("User logged in: {}", login);
-        return new AuthResponse(true, "Login successful", user.getId().toString(), user.getLogin());
+        return new AuthResponse(true, "Login successful", user.getId(), user.getLogin());
     }
 
     private String hashPassword(String password) {

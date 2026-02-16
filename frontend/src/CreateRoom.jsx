@@ -12,7 +12,7 @@ function CreateRoom({ user, onRoomCreated, onCancel }) {
     const [error, setError] = useState('');
     const [uploadedVideoId, setUploadedVideoId] = useState(null);
 
-    const API_URL = 'http://localhost:8080';
+    const API_URL = 'http://localhost:8080/room/api';
 
     // Загружаем список видео пользователя при монтировании
     useEffect(() => {
@@ -23,7 +23,7 @@ function CreateRoom({ user, onRoomCreated, onCancel }) {
 
     const fetchUserVideos = async () => {
         try {
-            const response = await fetch(`${API_URL}/api/rooms/my-videos`, {
+            const response = await fetch(`${API_URL}/my-videos`, {
                 credentials: 'include'
             });
             if (response.ok) {
@@ -66,7 +66,7 @@ function CreateRoom({ user, onRoomCreated, onCancel }) {
                 videoId: selectedVideo?.id || uploadedVideoId
             });
 
-            const response = await fetch(`${API_URL}/api/rooms/create`, {
+            const response = await fetch(`${API_URL}/create`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

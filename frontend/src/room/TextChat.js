@@ -15,7 +15,7 @@ const TextChat = (props) => {
         });
 
         return () => sub?.unsubscribe();
-    }, [subscribe, props]);
+    }, [subscribe, props.roomId]);
     useEffect(() => {
         bottomRef.current?.scrollIntoView({behavior: "smooth"});
     }, [messages]);

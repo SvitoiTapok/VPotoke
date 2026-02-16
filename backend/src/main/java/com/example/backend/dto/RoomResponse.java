@@ -16,7 +16,6 @@ public class RoomResponse {
     private UUID moderatorId;
     private String moderatorLogin;
     private String inviteLink;
-    private int participantsCount;
 
     public static RoomResponse fromEntity(Room room) {
         RoomResponse response = new RoomResponse();
@@ -38,7 +37,7 @@ public class RoomResponse {
         response.setModeratorId(room.getCreator().getId());
         response.setModeratorLogin(room.getCreator().getLogin());
         response.setInviteLink(room.getLink());
-        response.setParticipantsCount(room.getParticipants().size());
+        //response.setParticipantsCount(room.getParticipants().size());
         return response;
     }
 }

@@ -19,7 +19,6 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@CrossOrigin(origins = "*")
 @RequestMapping("/room/api")
 @RequiredArgsConstructor
 public class RoomController {
@@ -52,6 +51,7 @@ public class RoomController {
         } catch (NoSuchElementException e) {
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
+            log.error("newParticipant failed", e);
             return ResponseEntity.badRequest().build();
         }
     }
@@ -161,7 +161,7 @@ public class RoomController {
     }
     @PostMapping("/create")
     public ResponseEntity<?> createRoom(@RequestBody com.example.backend.dto.CreateRoomRequest request, HttpSession session) {
-        String userId = (String) session.getAttribute("userId");
+        UUID userId = (UUID) session.getAttribute("userId");
         if (userId == null) {
             log.warn("No userId in session. Available attributes:");
             java.util.Enumeration<String> attributeNames = session.getAttributeNames();
@@ -181,7 +181,7 @@ public class RoomController {
     }
     @GetMapping("/my-videos")
     public ResponseEntity<?> getMyVideos(HttpSession session) {
-        String userId = (String) session.getAttribute("userId");
+        UUID userId = (UUID) session.getAttribute("userId");
         if (userId == null) {
             return ResponseEntity.status(401).body(Map.of("error", "Not authenticated"));
         }
@@ -226,6 +226,10 @@ public class RoomController {
         updateParticipantsReq(roomId);
         return ResponseEntity.badRequest().build();
 
+    }
+    @GetMapping("/getVideoName")
+    public ResponseEntity<?> getVideoName(@RequestParam UUID roomId) {
+        return ResponseEntity.ok(roomService.getVideoName(roomId));
     }
 
 //    @PostMapping("/{roomId}/join")

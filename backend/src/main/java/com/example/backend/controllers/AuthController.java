@@ -9,10 +9,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 @Slf4j
 public class AuthController {
 
@@ -51,7 +51,7 @@ public class AuthController {
 
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(HttpSession session) {
-        String userId = (String) session.getAttribute("userId");
+        UUID userId = (UUID) session.getAttribute("userId");
         String userLogin = (String) session.getAttribute("userLogin");
 
         if (userId == null) {

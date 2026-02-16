@@ -23,6 +23,7 @@ public class Video {
 
     private LocalDateTime uploadedAt;
     private LocalDateTime expiresAt;  // удаляем через 6 часов (FR-03)
+    private String filename;
 
     @PrePersist
     public void prePersist() {

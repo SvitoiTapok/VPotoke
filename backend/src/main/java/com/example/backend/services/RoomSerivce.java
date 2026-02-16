@@ -73,7 +73,10 @@ public class RoomSerivce {
         p.setColor(ColorUtil.randomNiceColor());
         p.setPlayer_rights(true);
         p.setMessage_rights(true);
-        return participantRepository.save(p).getId();
+        p.setSessionId(sessionId);
+        UUID id = participantRepository.save(p).getId();
+        playerPosRepository.save(id, roomId, 0);
+        return id;
     }
 
     public void registerPlayerPos(UUID authorId, UUID roomId, long timing){
@@ -120,7 +123,6 @@ public class RoomSerivce {
                 participantRepository.deleteById(participant.getId());
                 return null;
             }
-            log.info(participant.getId().toString());
             return new ParticipantDTO(participant.getNickname(), participant.getColor(), participant.getId().toString(), participant.getPlayer_rights(), participant.getMessage_rights(), participant.getAdmin());
         })).filter(Objects::nonNull).toList();
     }
@@ -146,7 +148,7 @@ public class RoomSerivce {
     }
 //==================================================================================================================
 @Transactional
-public com.example.backend.dto.RoomResponse createRoom(String userId, com.example.backend.dto.CreateRoomRequest request) {
+public com.example.backend.dto.RoomResponse createRoom(UUID userId, com.example.backend.dto.CreateRoomRequest request) {
     User moderator = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -161,8 +163,10 @@ public com.example.backend.dto.RoomResponse createRoom(String userId, com.exampl
     room.setDescription(request.getDescription());
     room.setVideo(video);
     room.setCreator(moderator);
+    room.setIsSync(false);
 
-    room = roomRepository.save(room);
+      room = roomRepository.save(room);
+//    newParticipantWithName(room.getId(), moderator.getLogin(), )
 
 //    RoomParticipant participant = new RoomParticipant();
 //    participant.setRoom(room);
@@ -211,7 +215,7 @@ public com.example.backend.dto.RoomResponse createRoom(String userId, com.exampl
 //        // participantRepository.deleteByRoomIdAndUserId(roomId, userId);
 //    }
 
-    public List<com.example.backend.dto.VideoInfo> getUserVideos(String userId) {
+    public List<com.example.backend.dto.VideoInfo> getUserVideos(UUID userId) {
         // Временное решение - возвращаем все видео, загруженные за последние 6 часов
         LocalDateTime sixHoursAgo = LocalDateTime.now().minusHours(6);
         return videoRepository.findByUploadedAtAfter(sixHoursAgo)
@@ -247,6 +251,10 @@ public com.example.backend.dto.RoomResponse createRoom(String userId, com.exampl
             return false;
         }
 
+    }
+    public String getVideoName(UUID roomId){
+        Room r = roomRepository.findById(roomId).orElseThrow(NoSuchElementException::new);
+        return r.getVideo().getFilename();
     }
 
 

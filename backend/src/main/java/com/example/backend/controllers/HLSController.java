@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@CrossOrigin(origins = "*")
 @RequestMapping("/player/api")
 @Slf4j
 @RequiredArgsConstructor
@@ -28,11 +27,11 @@ public class HLSController {
     private final YandexService s3;
     private final RoomSerivce roomSerivce;
     private final SimpMessagingTemplate messagingTemplate;
-    @GetMapping("/stream/{filename:.+}")
-    public ResponseEntity<byte[]> getHlsFile(@PathVariable String filename) {
+    @GetMapping("/stream/{roomId}/{filename:.+}")
+    public ResponseEntity<byte[]> getHlsFile(@PathVariable String filename, @PathVariable UUID roomId) {
 
-        byte[] data = s3.getFile("hls_test2/" + filename);
-        //log.info("HLS File: {}", filename);
+        byte[] data = s3.getFile("videos/" + roomSerivce.getVideoName(roomId) + "/"+ filename);
+        filename = "master.m3u8";
         MediaType type = filename.endsWith(".m3u8")
                 ? MediaType.valueOf("application/vnd.apple.mpegurl")
                 : MediaType.valueOf("video/MP2T");

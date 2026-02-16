@@ -42,7 +42,7 @@ public class VideoConversionService {
                         "-hls_time", "10",
                         "-hls_list_size", "0",
                         "-f", "hls",
-                        "-hls_segment_filename", outputDir + "/segment_%03d.ts",
+                        "-hls_segment_filename", outputDir + "/master_%03d.ts",
                         outputPlaylist
                 );
 

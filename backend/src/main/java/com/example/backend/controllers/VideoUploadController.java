@@ -78,10 +78,17 @@ public class VideoUploadController {
 
             // Увеличиваем таймаут для больших файлов (15 минут)
             String hlsPath = future.get(15, TimeUnit.MINUTES);
+            String videoId = hlsPath
+                    .substring(hlsPath.lastIndexOf("/videos/") + 8,  // после /videos/
+                            hlsPath.lastIndexOf("/master.m3u8")); // до master
+
+            log.info("Extracted videoId from HLS path: {}", videoId);
+
 
             // Сохраняем в БД
             Video video = new Video();
             video.setOriginalFileName(file.getOriginalFilename());
+            video.setFilename(videoId);
             video.setFileSize(file.getSize());
             video.setHlsPath(hlsPath);
             video.setPlaylistUrl(hlsPath);

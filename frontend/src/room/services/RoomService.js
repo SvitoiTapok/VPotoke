@@ -26,26 +26,16 @@ const roomService = {
             throw error;
         }
     },
-    sendPosition: async (author_id, room_id, timing) => {
+    getOrCreateUser: async (roomUUID, name) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/addNewPlayerPos`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({authorId: author_id, roomId: room_id, timing: timing})
-            });
-        } catch (error) {
-            if (error.name === 'TypeError' && error.message.includes('fetch')) {
-                throw new Error('Ошибка соединения с сервером.');
+            let isExist = sessionStorage.getItem(roomUUID)
+            if(!isExist) {
+                const response = await fetch(`${API_BASE_URL}/newParticipantWithName?roomId=${roomUUID}&sessionId=${roomService.getSessionId()}&name=${name}`);
+                let x = await response.json()
+                sessionStorage.setItem(roomUUID, x)
+                return x
             }
-            throw error;
-        }
-    },
-    getPositions: async (roomId, authorId) => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/getPlayerPos?roomId=${roomId}&authorId=${authorId}`);
-            return response.json()
+            return isExist
         } catch (error) {
             if (error.name === 'TypeError' && error.message.includes('fetch')) {
                 throw new Error('Ошибка соединения с сервером.');
@@ -57,10 +47,10 @@ const roomService = {
         const response = await fetch(`${API_BASE_URL}/updateName?authorId=${authorId}&name=${name}`);
     },
 
-    getParticipants: async (roomId) => {
+    getVideoName: async (roomId) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/getParticipants?roomID=${roomId}`);
-            return response.json()
+            const response = await fetch(`${API_BASE_URL}/getVideoName?roomId=${roomId}`);
+            return await response.text();
         } catch (error) {
             if (error.name === 'TypeError' && error.message.includes('fetch')) {
                 throw new Error('Ошибка соединения с сервером.');
@@ -68,20 +58,7 @@ const roomService = {
             throw error;
         }
     },
-    deleteParticipant: async (userId) => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/deleteParticipant/${userId}`, {
-                method: 'DELETE'
-}
-            )
-            return response.json()
-        } catch (error) {
-            if (error.name === 'TypeError' && error.message.includes('fetch')) {
-                throw new Error('Ошибка соединения с сервером.');
-            }
-            throw error;
-        }
-    },
+
     sendSyncOnRequest: async (roomId, userId, pos) => {
         return await fetch(`${API_BASE_URL}/OnSyncMode?roomId=${roomId}&userId=${userId}&pos=${pos}`)
     },
