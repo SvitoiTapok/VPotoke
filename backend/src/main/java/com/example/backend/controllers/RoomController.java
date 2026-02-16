@@ -5,6 +5,7 @@ import com.example.backend.services.RoomSerivce;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -82,20 +83,22 @@ public class RoomController {
 //
         return ResponseEntity.ok().build();
     }
+
     @GetMapping("/OnSyncMode")
     public ResponseEntity<?> onSyncMode(@RequestParam UUID roomId, @RequestParam UUID userId, @RequestParam float pos) {
         log.info("onSyncMode");
-        if(roomService.changeMode(roomId, userId, true)){
+        if (roomService.changeMode(roomId, userId, true)) {
             sendSync(roomId, true);
             sendPosition(roomId, pos);
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.badRequest().build();
     }
+
     @GetMapping("/OffSyncMode")
     public ResponseEntity<?> offSyncMode(@RequestParam UUID roomId, @RequestParam UUID userId) {
         log.info("offSyncMode");
-        if(roomService.changeMode(roomId, userId, false)){
+        if (roomService.changeMode(roomId, userId, false)) {
             sendSync(roomId, false);
             return ResponseEntity.ok().build();
         }
@@ -107,24 +110,27 @@ public class RoomController {
             @DestinationVariable UUID roomId
     ) {
         log.info("handlePause by roomId: {}", roomId);
-        if(roomService.getSync(roomId)) sendPause(roomId);
+        if (roomService.getSync(roomId)) sendPause(roomId);
 
     }
+
     @MessageMapping("/player.play/{roomId}")
     public void handlePlay(
             @DestinationVariable UUID roomId
     ) {
         log.info("handlePlay by roomId: {}", roomId);
-        if(roomService.getSync(roomId)) sendPlay(roomId);
+        if (roomService.getSync(roomId)) sendPlay(roomId);
     }
+
     @MessageMapping("/player.pos/{roomId}")
     public void handlePosition(
             @DestinationVariable UUID roomId,
             @Payload float pos
     ) {
         log.info("handlePos by roomId: {}", roomId);
-        if(roomService.getSync(roomId)) sendPosition(roomId, pos);
+        if (roomService.getSync(roomId)) sendPosition(roomId, pos);
     }
+
     private void sendPause(UUID roomId) {
         messagingTemplate.convertAndSend(
                 "/topic/room/" + roomId + "/pause",
@@ -132,6 +138,7 @@ public class RoomController {
 
         );
     }
+
     private void sendPlay(UUID roomId) {
         messagingTemplate.convertAndSend(
                 "/topic/room/" + roomId + "/play",
@@ -139,6 +146,7 @@ public class RoomController {
 
         );
     }
+
     private void sendPosition(UUID roomId, float pos) {
         messagingTemplate.convertAndSend(
                 "/topic/room/" + roomId + "/position",
@@ -146,6 +154,7 @@ public class RoomController {
 
         );
     }
+
     private void sendSync(UUID roomId, boolean mode) {
         messagingTemplate.convertAndSend(
                 "/topic/room/" + roomId + "/sync",
@@ -153,12 +162,27 @@ public class RoomController {
 
         );
     }
-    private void updateParticipantsReq(UUID roomId){
+
+    private void updateParticipantsReq(UUID roomId) {
         messagingTemplate.convertAndSend(
                 "/topic/room/" + roomId + "/participants",
                 roomService.getAllParticipants(roomId)
         );
     }
+    private void notifyToExitAll(UUID roomId) {
+        messagingTemplate.convertAndSend(
+                "/topic/room/" + roomId + "/exit",
+                ""
+        );
+    }
+    private void notifyToExitOne(UUID roomId, UUID participantId) {
+        messagingTemplate.convertAndSend(
+                "/topic/room/" + roomId + "/exit/"+participantId,
+                ""
+        );
+    }
+
+
     @PostMapping("/create")
     public ResponseEntity<?> createRoom(@RequestBody com.example.backend.dto.CreateRoomRequest request, HttpSession session) {
         UUID userId = (UUID) session.getAttribute("userId");
@@ -179,6 +203,7 @@ public class RoomController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
+
     @GetMapping("/my-videos")
     public ResponseEntity<?> getMyVideos(HttpSession session) {
         UUID userId = (UUID) session.getAttribute("userId");
@@ -209,68 +234,46 @@ public class RoomController {
             return ResponseEntity.notFound().build();
         }
     }
+
     @GetMapping("/togglePermission")
     public ResponseEntity<?> togglePermission(@RequestParam UUID roomId, @RequestParam UUID userId, @RequestParam UUID adminId, @RequestParam String type) {
-        if(roomService.togglePermission(userId, adminId, type)){
+        if (roomService.togglePermission(userId, adminId, type)) {
+            updateParticipantsReq(roomId);
             return ResponseEntity.ok().build();
         }
-        updateParticipantsReq(roomId);
+
         return ResponseEntity.badRequest().build();
 
     }
+
     @GetMapping("/makeAdmin")
     public ResponseEntity<?> makeAdmin(@RequestParam UUID roomId, @RequestParam UUID userId, @RequestParam UUID adminId) {
-        if(roomService.makeAdmin(userId, adminId)){
+        if (roomService.makeAdmin(userId, adminId)) {
+            updateParticipantsReq(roomId);
             return ResponseEntity.ok().build();
         }
-        updateParticipantsReq(roomId);
         return ResponseEntity.badRequest().build();
 
     }
+
     @GetMapping("/getVideoName")
     public ResponseEntity<?> getVideoName(@RequestParam UUID roomId) {
         return ResponseEntity.ok(roomService.getVideoName(roomId));
     }
 
-//    @PostMapping("/{roomId}/join")
-//    public ResponseEntity<?> joinRoom(@PathVariable String roomId,
-//                                      @RequestBody(required = false) Map<String, String> request,
-//                                      HttpSession session) {
-//        String userId = (String) session.getAttribute("userId");
-//        String nickname = request != null ? request.get("nickname") : null;
-//
-//        try {
-//            roomService.joinRoom(roomId, userId, nickname);
-//            return ResponseEntity.ok(Map.of("success", true));
-//        } catch (Exception e) {
-//            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-//        }
-//    }
-
-//    @PostMapping("/{roomId}/leave")
-//    public ResponseEntity<?> leaveRoom(@PathVariable String roomId, HttpSession session) {
-//        String userId = (String) session.getAttribute("userId");
-//
-//        if (userId == null) {
-//            return ResponseEntity.status(401).body(Map.of("error", "Not authenticated"));
-//        }
-//
-//        try {
-//            log.info("User {} leaving room {}", userId, roomId);
-//            // Здесь должна быть логика удаления участника из комнаты
-//            // participantRepository.deleteByRoomIdAndUserId(roomId, userId);
-//
-//            return ResponseEntity.ok(Map.of("success", true, "message", "Left room successfully"));
-//        } catch (Exception e) {
-//            log.error("Error leaving room", e);
-//            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-//        }
-//    }
-    //    @DeleteMapping("/deleteParticipant/{userId}")
-//    public ResponseEntity<?> deleteParticipant(@PathVariable UUID userId) {
-//        roomSerivce.deleteParticipant(userId);
-//        return ResponseEntity.ok().build();
-//    }
+    @DeleteMapping("/deleteParticipant/{userId}/{roomId}/{adminId}")
+    public ResponseEntity<?> deleteParticipant(@PathVariable UUID userId, @PathVariable UUID roomId, @PathVariable UUID adminId) {
+        if(!roomService.deleteParticipant(userId, adminId)) return ResponseEntity.status(HttpStatusCode.valueOf(403)).build();
+        updateParticipantsReq(roomId);
+        notifyToExitOne(roomId, userId);
+        return ResponseEntity.ok().build();
+    }
+    @DeleteMapping("/destroyRoom/{roomId}/{adminId}")
+    public ResponseEntity<?> destroyRoom(@PathVariable UUID adminId, @PathVariable UUID roomId) {
+        if(!roomService.destroyRoom(roomId, adminId)) return ResponseEntity.status(HttpStatusCode.valueOf(403)).build();
+        notifyToExitAll(roomId);
+        return ResponseEntity.ok().build();
+    }
 //    @PostMapping(value = "/leave/{participantId}/{roomId}", consumes = "*/*")
 //    public ResponseEntity<Void> leave(@PathVariable UUID participantId, @PathVariable UUID roomId) {
 //        log.info("LEAVE {}", participantId);

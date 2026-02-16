@@ -42,7 +42,9 @@ public class Room {
         // Генерируем уникальную ссылку-приглашение
         link = generateInviteLink();
     }
-    @OneToMany(mappedBy = "room")
+    @OneToMany(mappedBy = "room",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
     private List<Participant> participants;
     private String generateInviteLink() {
         return "room-" + java.util.UUID.randomUUID().toString().substring(0, 8);

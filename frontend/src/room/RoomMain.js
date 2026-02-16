@@ -8,7 +8,7 @@ import roomService from "./services/RoomService";
 import Participants from "./Participants";
 import LeaveButton from "./LeaveButton";
 
-const RoomMain = () => {
+const RoomMain = (props) => {
     const [prid, setPrid] = useState(null)
     const pridRef = useRef(false)
     const API_URL = 'http://localhost:8080';
@@ -161,7 +161,7 @@ const RoomMain = () => {
 //=============================================================
     return (
         <div className="room-container">
-            <LeaveButton/>
+
 
 
             <main className="main-area">

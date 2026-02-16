@@ -263,6 +263,26 @@
 .leave-button:hover {
     background-color: #ff7875;
 }
+
+.destroy-button {
+    position: fixed;
+    bottom: 20px;
+    right: 120px;
+    background-color: #ff4d4f;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    transition: background-color 0.2s ease;
+    z-index: 1000;
+}
+
+.leave-button:hover {
+    background-color: #ff7875;
+}
 .toggle-btn {
     padding: 8px 16px;
     border-radius: 20px;

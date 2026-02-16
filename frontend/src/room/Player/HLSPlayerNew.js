@@ -59,10 +59,12 @@ const HlsPlayerNew = (props) => {
         });
 
         player.on("seeked", () => {
+            console.log(isRemote.current)
             if (isRemote.current) {
                 isRemote.current = false;
                 return;
             }
+            console.log(isRemote.current)
             const timing = playerRef.current.currentTime();
             send({
                 destination: `/app/player.pos/${props.roomId}`,

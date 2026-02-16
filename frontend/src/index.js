@@ -14,12 +14,7 @@ root.render(
     <React.StrictMode>
         <BrowserRouter>
             <nav className="navigation">
-                <NavLink
-                    to="/room"
-                    className={({isActive}) => isActive ? 'nav-link active' : 'nav-link'}
-                >
-                    Main
-                </NavLink>
+
             <Routes>
                 <Route path="/" element={<App />}/>
                 <Route path="/room/:roomId" element={<RoomMain/>}/>

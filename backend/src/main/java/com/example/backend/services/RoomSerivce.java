@@ -97,15 +97,17 @@ public class RoomSerivce {
         }).filter(Objects::nonNull).toList();
     }
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public void deleteParticipant(UUID authorId){
-
-        try {
-            participantRepository.deleteById(authorId);
-        }catch (Exception ignored) {}
-
-        log.info("Deleted participant {}", authorId);
-
-
+    public boolean deleteParticipant(UUID authorId, UUID adminId){
+        Participant p = participantRepository.findById(adminId).orElseThrow(NoSuchElementException::new);
+        if(p.getAdmin()||authorId.equals(adminId)){
+            try {
+                participantRepository.deleteById(authorId);
+            }catch (Exception ignored) {}
+            log.info("Deleted participant {}", authorId);
+            return true;
+        }else {
+            return false;
+        }
 
     }
     public Participant getParticipant(UUID authorId){
@@ -228,10 +230,12 @@ public com.example.backend.dto.RoomResponse createRoom(UUID userId, com.example.
         Participant p = participantRepository.findById(adminId).orElseThrow(NoSuchElementException::new);
         if(p.getAdmin()){
             Participant p1 = participantRepository.findById(authorId).orElseThrow(NoSuchElementException::new);
+            if(p1.getAdmin())
+                return false;
             if(Objects.equals(type, "PLAYER")){
                 p1.setPlayer_rights(!p1.getPlayer_rights());
             }else {
-                p1.setPlayer_rights(!p1.getMessage_rights());
+                p1.setMessage_rights(!p1.getMessage_rights());
             }
             participantRepository.save(p1);
             return true;
@@ -245,12 +249,23 @@ public com.example.backend.dto.RoomResponse createRoom(UUID userId, com.example.
         if(p.getAdmin()){
             Participant p1 = participantRepository.findById(authorId).orElseThrow(NoSuchElementException::new);
             p1.setAdmin(true);
+            p1.setMessage_rights(true);
+            p1.setPlayer_rights(true);
             participantRepository.save(p1);
             return true;
         }else {
             return false;
         }
 
+    }
+    public boolean destroyRoom(UUID roomId, UUID adminId){
+        Participant p = participantRepository.findById(adminId).orElseThrow(NoSuchElementException::new);
+        if(p.getAdmin()){
+            roomRepository.deleteById(roomId);
+            return true;
+        }else {
+            return false;
+        }
     }
     public String getVideoName(UUID roomId){
         Room r = roomRepository.findById(roomId).orElseThrow(NoSuchElementException::new);

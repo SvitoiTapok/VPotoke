@@ -19,6 +19,22 @@ const roomService = {
                 return x
             }
             return isExist
+                // const response = await fetch(`${API_BASE_URL}/newParticipant?roomId=${roomUUID}&sessionId=${crypto.randomUUID()}`);
+                // let x = await response.json()
+                // return x
+        } catch (error) {
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                throw new Error('Ошибка соединения с сервером.');
+            }
+            throw error;
+        }
+    },
+    createParticipant: async (roomUUID) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/newParticipant?roomId=${roomUUID}&sessionId=${roomService.getSessionId()}`);
+            let x = await response.json()
+            sessionStorage.setItem(roomUUID, x)
+            return x
         } catch (error) {
             if (error.name === 'TypeError' && error.message.includes('fetch')) {
                 throw new Error('Ошибка соединения с сервером.');
@@ -36,6 +52,9 @@ const roomService = {
                 return x
             }
             return isExist
+            // const response = await fetch(`${API_BASE_URL}/newParticipant?roomId=${roomUUID}&sessionId=${crypto.randomUUID()}`);
+            // let x = await response.json()
+            // return x
         } catch (error) {
             if (error.name === 'TypeError' && error.message.includes('fetch')) {
                 throw new Error('Ошибка соединения с сервером.');
@@ -66,11 +85,24 @@ const roomService = {
         return await fetch(`${API_BASE_URL}/OffSyncMode?roomId=${roomId}&userId=${userId}`)
     },
     togglePermission: async (userId,adminId, type, roomId) => {
-        return await fetch(`${API_BASE_URL}/togglePermission?userId=${userId}&adminId=${adminId}&type=${type}&roomId${roomId}`)
+        console.log("toggle")
+        return await fetch(`${API_BASE_URL}/togglePermission?userId=${userId}&adminId=${adminId}&type=${type}&roomId=${roomId}`)
     },
     makeAdmin: async (userId, adminId, roomId) => {
-        return await fetch(`${API_BASE_URL}/togglePermission?userId=${userId}&adminId=${adminId}&roomId${roomId}`)
-    }
+        return await fetch(`${API_BASE_URL}/makeAdmin?userId=${userId}&adminId=${adminId}&roomId=${roomId}`)
+    },
+    deleteParticipant: async (userId, roomId, adminId) =>{
+        return await fetch(`${API_BASE_URL}/deleteParticipant/${userId}/${roomId}/${adminId}`, {
+                method: 'DELETE'
+            }
+        )
+    },
+    destroyRoom: async (roomId, adminId) =>{
+        return await fetch(`${API_BASE_URL}/destroyRoom/${roomId}/${adminId}`, {
+                method: 'DELETE'
+            }
+        )
+    },
 
 };
 

@@ -26,6 +26,7 @@ public class ChatController {
             @Payload ChatMessageInputDTO msg
     ) {
         ChatMessageOutputDTO mes = roomSerivce.saveMessage(msg);
+        if(mes==null) return;
         log.info("Message sent to room {}: {}", roomId, mes);
         messagingTemplate.convertAndSend(
                 "/topic/room/" + roomId + "/chat",

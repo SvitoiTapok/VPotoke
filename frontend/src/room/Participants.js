@@ -1,8 +1,11 @@
 import {useEffect, useRef, useState} from "react";
 import {useWS} from "./services/WebSocketContext";
 import roomService from "./services/RoomService";
+import LeaveButton from "./LeaveButton";
+import {useNavigate} from "react-router-dom";
 
 const Participants = (props) => {
+    const navigate = useNavigate()
     const {subscribe, send} = useWS();
     const [participants, setParticipants] = useState([]);
     const [avatar, setAvatar] = useState(null);
@@ -16,7 +19,10 @@ const Participants = (props) => {
             if (props.prid) {
                 const chat = JSON.parse(msg.body);
                 const avatar = chat.find(p => p.id === props.prid);
+                console.log(avatar)
                 const others = chat.filter(p => p.id !== props.prid);
+                console.log(avatar)
+                if(avatar===undefined) roomService.createParticipant(props.roomId)
                 setAvatar(avatar);
                 setParticipants(others);
             }
@@ -43,11 +49,14 @@ const Participants = (props) => {
 
     };
     const togglePermission = (userId, type) => {
-        roomService.togglePermission(userId, props.prid, type)
+        roomService.togglePermission(userId, props.prid, type, props.roomId)
     };
 
     const makeAdmin = (userId) => {
-        roomService.makeAdmin(userId, props.prid)
+        roomService.makeAdmin(userId, props.prid, props.roomId)
+    };
+    const deleteParticipant = (userId) => {
+        roomService.deleteParticipant(userId, props.roomId, props.prid)
     };
 
     return (
@@ -86,27 +95,32 @@ const Participants = (props) => {
                         <span className="avatar" style={{backgroundColor: part.color}}/>
                         <span className="name">{part.name}</span>
 
-                        {selected === part.id && (
+                        {selected === part.id && avatar.adminRights && !part.adminRights && (
                             <div className="participant-menu">
                                 <button onClick={() => togglePermission(part.id, "PLAYER")}>
-                                    🎬 Управление плеером
+                                    Управление плеером
                                 </button>
                                 <button onClick={() => togglePermission(part.id, "CHAT")}>
-                                    💬 Право писать в чат
+                                    Право писать в чат
+                                </button>
+                                <button onClick={() => deleteParticipant(part.id)}>
+                                    Выгнать из комнаты
                                 </button>
                                 <button
                                     className="admin-btn"
                                     onClick={() => makeAdmin(part.id)}
                                 >
-                                    ⭐ Сделать админом
+                                    Сделать админом
                                 </button>
                             </div>
                         )}
                     </li>
                 ))}
             </ul>
+            <LeaveButton admin={avatar?.adminRights} roomId={props.roomId} prid={props.prid}/>
 
         </aside>
+
     );
 
 }
